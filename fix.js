@@ -159,7 +159,6 @@ function fixNetworkFilters() {
     container.style.borderBottom = '1px solid #F5F5F5';
     container.style.paddingBottom = '8px';
   });
-}
 
 // =================================================================
 // TOKEN DETAIL PAGE FIXES
