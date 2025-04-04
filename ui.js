@@ -92,89 +92,93 @@
   // 7. Fix Send Screen - Improve token display and formatting
   function fixSendScreen() {
     console.log('Fixing send screen');
-    
+
     const sendScreen = document.getElementById('send-screen');
     if (!sendScreen) return;
-    
+
     // Fix token selection row
-    const tokenSelectionRow = sendScreen.querySelector('.token-selection-row');
+    const tokenSelectionRow = sendScreen.querySelector(".token-selection-row");
     if (tokenSelectionRow) {
-      // Get token information
-      const activeWallet = window.activeWallet || 'main';
-      const tokenId = window.activeSendTokenId || 'usdt';
-      let token = null;
-      
-      // Try to get token data from wallet state
-      if (window.currentWalletData && 
-          window.currentWalletData[activeWallet] && 
-          window.currentWalletData[activeWallet].tokens) {
-        token = window.currentWalletData[activeWallet].tokens.find(t => t.id === tokenId);
-      }
-      
-      // Only proceed if we have token data
-      if (token) {
-        // Get token info column
-        const tokenInfoColumn = tokenSelectionRow.querySelector('.token-info-column');
-        if (tokenInfoColumn) {
-          // Replace with correctly styled content
-          tokenInfoColumn.innerHTML = `
+        // Get token information
+        const activeWallet = window.activeWallet || "main";
+        const tokenId = window.activeSendTokenId || "usdt";
+        let token = null;
+
+        // Try to get token data from wallet state
+        if (
+            window.currentWalletData &&
+            window.currentWalletData[activeWallet] &&
+            window.currentWalletData[activeWallet].tokens
+        ) {
+            token = window.currentWalletData[activeWallet].tokens.find(
+                (t) => t.id === tokenId
+            );
+        }
+
+        // Only proceed if we have token data
+        if (token) {
+            // Get token info column
+            const tokenInfoColumn = tokenSelectionRow.querySelector(".token-info-column");
+            if (tokenInfoColumn) {
+                // Replace with correctly styled content
+                tokenInfoColumn.innerHTML = `
             <div class="token-name-row">
               <span class="selected-token-name">${token.symbol}</span>
-              <span class="network-badge-pill">${token.network || 'Network'}</span>
+              <span class="network-badge-pill">${token.network || "Network"}</span>
             </div>
-            <div class="token-fullname">${token.name}</div>
+            <div class="token-fullname" style="background-color: transparent !important;">${token.name}</div>
           `;
-          
-          // Style network badge
-          const networkBadge = tokenInfoColumn.querySelector('.network-badge-pill');
-          if (networkBadge) {
-            networkBadge.style.display = 'inline-block';
-            networkBadge.style.fontSize = '12px';
-            networkBadge.style.color = '#5F6C75';
-            networkBadge.style.backgroundColor = '#F5F5F5';
-            networkBadge.style.padding = '2px 8px';
-            networkBadge.style.borderRadius = '10px';
-            networkBadge.style.marginLeft = '8px';
-            networkBadge.style.fontWeight = '400';
-          }
-          
-          // Style token name
-          const tokenFullname = tokenInfoColumn.querySelector('.token-fullname');
-          if (tokenFullname) {
-            tokenFullname.style.fontSize = '12px';
-            tokenFullname.style.color = '#8A939D';
-            tokenFullname.style.background = 'none';
-            tokenFullname.style.padding = '0';
-          }
-        }
-        
-        // Add dollar value in the available balance section
-        const availableBalance = sendScreen.querySelector('#available-balance');
-        if (availableBalance) {
-          const maxAmount = availableBalance.querySelector('#max-amount');
-          const maxSymbol = availableBalance.querySelector('#max-symbol');
-          
-          if (maxAmount && maxSymbol) {
-            // Calculate dollar value
-            const amountValue = parseFloat(maxAmount.textContent) * token.price;
-            const formattedValue = formatCurrency(amountValue);
-            
-            // Add dollar value if not already present
-            if (!availableBalance.querySelector('.balance-dollar-value')) {
-              const dollarValue = document.createElement('span');
-              dollarValue.className = 'balance-dollar-value';
-              dollarValue.textContent = ` (${formattedValue})`;
-              dollarValue.style.fontSize = '12px';
-              dollarValue.style.color = '#8A939D';
-              
-              // Append after symbol
-              maxSymbol.insertAdjacentElement('afterend', dollarValue);
+
+                // Style network badge
+                const networkBadge = tokenInfoColumn.querySelector(".network-badge-pill");
+                if (networkBadge) {
+                    networkBadge.style.display = "inline-block";
+                    networkBadge.style.fontSize = "12px";
+                    networkBadge.style.color = "#5F6C75";
+                    networkBadge.style.backgroundColor = "#F5F5F5";
+                    networkBadge.style.padding = "2px 8px";
+                    networkBadge.style.borderRadius = "10px";
+                    networkBadge.style.marginLeft = "8px";
+                    networkBadge.style.fontWeight = "400";
+                }
+
+                // Style token name
+                const tokenFullname = tokenInfoColumn.querySelector(".token-fullname");
+                if (tokenFullname) {
+                    tokenFullname.style.fontSize = "12px";
+                    tokenFullname.style.color = "#8A939D";
+                    tokenFullname.style.background = "none";
+                    tokenFullname.style.padding = "0";
+                }
             }
-          }
+
+            // Add dollar value in the available balance section
+            const availableBalance = sendScreen.querySelector("#available-balance");
+            if (availableBalance) {
+                const maxAmount = availableBalance.querySelector("#max-amount");
+                const maxSymbol = availableBalance.querySelector("#max-symbol");
+
+                if (maxAmount && maxSymbol) {
+                    // Calculate dollar value
+                    const amountValue = parseFloat(maxAmount.textContent) * token.price;
+                    const formattedValue = formatCurrency(amountValue);
+
+                    // Add dollar value if not already present
+                    if (!availableBalance.querySelector(".balance-dollar-value")) {
+                        const dollarValue = document.createElement("span");
+                        dollarValue.className = "balance-dollar-value";
+                        dollarValue.textContent = ` (${formattedValue})`;
+                        dollarValue.style.fontSize = "12px";
+                        dollarValue.style.color = "#8A939D";
+
+                        // Append after symbol
+                        maxSymbol.insertAdjacentElement("afterend", dollarValue);
+                    }
+                }
+            }
         }
-      }
     }
-  }
+}
   
   // 8. Fix Admin Panel - Improve functionality and error handling
   function fixAdminPanel() {
