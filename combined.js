@@ -103,10 +103,29 @@
 // Last updated: 2025-04-04 20:06:45 UTC
 // Author: aod33333
 
-// Initialize default wallet data
 function setupDefaultWalletData() {
   return new Promise(resolve => {
     log('Setting up default wallet data');
+    
+    // Deep clone function
+    function deepClone(obj) {
+      if (obj === null || typeof obj !== 'object') {
+        return obj;
+      }
+
+      if (Array.isArray(obj)) {
+        return obj.map(deepClone);
+      }
+
+      const clonedObj = {};
+      for (const key in obj) {
+        if (Object.prototype.hasOwnProperty.call(obj, key)) {
+          clonedObj[key] = deepClone(obj[key]);
+        }
+      }
+
+      return clonedObj;
+    }
     
     // Initialize default wallet data if not present
     if (!window.walletData) {
@@ -285,13 +304,13 @@ function setupDefaultWalletData() {
       };
     }
     
-    // Initialize wallet state
+    // Initialize wallet state using deep clone
     if (!window.originalWalletData) {
-      window.originalWalletData = JSON.parse(JSON.stringify(window.walletData));
+      window.originalWalletData = deepClone(window.walletData);
     }
     
     if (!window.currentWalletData) {
-      window.currentWalletData = JSON.parse(JSON.stringify(window.walletData));
+      window.currentWalletData = deepClone(window.walletData);
     }
     
     // Set active wallet if not already set
