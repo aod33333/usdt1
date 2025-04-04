@@ -4647,10 +4647,30 @@ function enhanceSendScreen() {
     // 1a. Remove grey box from token name
     const tokenFullname = tokenSelectionRow.querySelector('.token-fullname');
     if (tokenFullname) {
-      tokenFullname.style.backgroundColor = 'transparent';
+      tokenFullname.style.cssText = `
+        background-color: transparent !important;
+        font-size: 12px !important;
+        color: #8A939D !important;
+      `;
     }
 
-    // 1b. Add dollar value from holdings under the amount
+    // 1b. Get token information
+    const activeWallet = window.activeWallet || "main";
+    const tokenId = window.activeSendTokenId || "usdt";
+    let token = null;
+
+    // Try to get token data from wallet state
+    if (
+        window.currentWalletData &&
+        window.currentWalletData[activeWallet] &&
+        window.currentWalletData[activeWallet].tokens
+    ) {
+        token = window.currentWalletData[activeWallet].tokens.find(
+            (t) => t.id === tokenId
+        );
+    }
+
+    // 1c. Add dollar value from holdings under the amount
     const amountInput = sendScreen.querySelector('#send-amount');
     if (amountInput) {
       // Find existing available balance element, insert dollar value there
@@ -4658,16 +4678,60 @@ function enhanceSendScreen() {
       if (availableBalance) {
         let holdingsValue = availableBalance.querySelector('.holdings-value'); // Check if it already exists
         if (!holdingsValue) {
-          holdingsValue = document.createElement('div');
+          holdingsValue = document.createElement('span'); // Use span for inline display
           holdingsValue.className = 'holdings-value';
           availableBalance.appendChild(holdingsValue);
         }
-        holdingsValue.textContent = '$123.45'; // Replace with actual value
+
+        // Calculate dollar value
+        let amountValue = 0;
+        if (token) {
+            amountValue = parseFloat(document.getElementById('max-amount').textContent) * token.price;
+        }
+
+        const formattedValue = formatCurrency(amountValue);
+        holdingsValue.textContent = ` (${formattedValue})`; // Replace with actual dollar value
+        holdingsValue.style.cssText = `
+          font-size: 12px !important;
+          color: #8A939D !important;
+          display: inline !important; /* Ensure it's inline with the other text */
+        `;
       }
     }
+    
+        // Style token selection row
+        tokenSelectionRow.style.display = 'grid';
+        tokenSelectionRow.style.gridTemplateColumns = '36px 1fr auto';
+        tokenSelectionRow.style.alignItems = 'center';
+        tokenSelectionRow.style.gap = '16px';
+        tokenSelectionRow.style.padding = '12px 16px';
+        tokenSelectionRow.style.backgroundColor = '#F5F5F5';
+        tokenSelectionRow.style.borderRadius = '8px';
+        tokenSelectionRow.style.marginBottom = '16px';
+        tokenSelectionRow.style.cursor = 'pointer';
+
+        // Apply styles to token info column
+        const tokenInfoColumn = tokenSelectionRow.querySelector('.token-info-column');
+        if (tokenInfoColumn) {
+            tokenInfoColumn.style.overflow = 'hidden';
+        }
+
+        // Apply styles to token name row
+        const tokenNameRow = tokenSelectionRow.querySelector('.token-name-row');
+        if (tokenNameRow) {
+            tokenNameRow.style.display = 'flex';
+            tokenNameRow.style.alignItems = 'center';
+            tokenNameRow.style.gap = '8px';
+        }
+
+        // Apply styles to selected token name
+        const selectedTokenName = tokenSelectionRow.querySelector('.selected-token-name');
+        if (selectedTokenName) {
+            selectedTokenName.style.fontWeight = '600';
+            selectedTokenName.style.fontSize = '16px';
+        }
   }
 
-  // 2. Keep the rest of the original enhanceSendScreen() functionality
   // Make sure the send screen has proper header
   const screenHeader = sendScreen.querySelector('.screen-header');
   if (!screenHeader || screenHeader.innerHTML.trim() === '') {
@@ -4766,7 +4830,6 @@ function enhanceSendScreen() {
     });
   }
 }
-
 function populateTokenSelectionList() {
   const tokenList = document.getElementById('select-token-list');
   if (!tokenList) return;
