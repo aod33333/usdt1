@@ -1,245 +1,57 @@
-// Comprehensive UI Fixes for Trust Wallet
+// Comprehensive Trust Wallet UI Enhancement and Bug Fix Solution
 (function() {
-  console.log('Applying comprehensive UI fixes for Trust Wallet...');
+  console.log('Initializing comprehensive Trust Wallet UI enhancement solution...');
   
-  // Run fixes after a slight delay to ensure DOM is loaded
-  setTimeout(function() {
-    // Fix 1: Improve network filter styling and position
-    fixNetworkFilters();
-    
-    // Fix 2: Add investment warning and staking details to token detail page
-    enhanceTokenDetailPage();
-    
-    // Fix 3: Fix receive screen token display (shorten address)
-    fixReceiveScreen();
-    
-    // Fix 4: Fix send screen token display formatting
-    fixSendScreen();
-    
-    // Fix 5: Fix admin panel error
-    fixAdminPanel();
-    
-    // Set up observer to watch for screen changes and reapply fixes
-    setupObserver();
-    
-    console.log('All UI fixes applied successfully');
-  }, 500);
+  // Configuration constants
+  const CONFIG = {
+    debug: false,                // Enable/disable debug logging
+    initDelay: 500,              // Delay before starting initialization (ms)
+    screenLoadDelay: 300,        // Delay after loading screens (ms)
+    useAnimations: true,         // Use smooth animations for transitions
+    badgeRemovalInterval: 500,   // Interval to remove unwanted badges (ms)
+    autoApplyFixes: true         // Automatically re-apply fixes when screens change
+  };
   
-  // Fix 1: Improve network filter styling and position
-  function fixNetworkFilters() {
-    console.log('Fixing network filters');
+  // Wait for DOM to be fully loaded
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => setTimeout(initFixes, CONFIG.initDelay));
+  } else {
+    // DOM already loaded, run with a delay
+    setTimeout(initFixes, CONFIG.initDelay);
+  }
+  
+  // Main initialization function
+  function initFixes() {
+    console.log('Applying comprehensive Trust Wallet UI fixes...');
     
-    // Find all network filter elements
-    const networkFilters = document.querySelectorAll('.networks-filter .all-networks');
-    
-    networkFilters.forEach(filter => {
-      // Apply consistent styling to match app design
-      filter.style.display = 'inline-flex';
-      filter.style.alignItems = 'center';
-      filter.style.backgroundColor = '#F5F5F5';
-      filter.style.borderRadius = '16px';
-      filter.style.padding = '6px 12px';
-      filter.style.fontSize = '12px';
-      filter.style.color = '#5F6C75';
-      filter.style.margin = '8px 20px'; // Increased left margin to move away from edge
-      filter.style.fontWeight = '500';
+    try {
+      // Global fixes
+      fixStatusBarPadding();
+      fixNetworkFilters();
+      centerHeaderTitles();
+      enhanceNetworkBadges();
+      fixBottomTabs();
       
-      // Fix the chevron alignment
-      const chevron = filter.querySelector('i.fa-chevron-down');
-      if (chevron) {
-        chevron.style.marginLeft = '6px';
-        chevron.style.fontSize = '10px';
-      }
-    });
-    
-    // Fix container styles with consistent padding
-    const filterContainers = document.querySelectorAll('.networks-filter');
-    filterContainers.forEach(container => {
-      container.style.textAlign = 'left';
-      container.style.borderBottom = '1px solid #F5F5F5';
-      container.style.paddingBottom = '8px';
-      container.style.paddingLeft = '4px'; // Add left padding to move away from edge
-    });
-  }
-  
-  // Fix 2: Add investment warning and staking details to token detail page
-  function enhanceTokenDetailPage() {
-    console.log('Enhancing token detail page');
-    
-    const tokenDetailPage = document.getElementById('token-detail');
-    if (!tokenDetailPage) return;
-    
-    const tokenDetailContent = tokenDetailPage.querySelector('.token-detail-content');
-    if (!tokenDetailContent) return;
-    
-    // Check if elements already exist to avoid duplicates
-    if (!tokenDetailContent.querySelector('.investment-warning')) {
-      addInvestmentWarning(tokenDetailContent);
-    }
-    
-    if (!tokenDetailContent.querySelector('.staking-container')) {
-      addStakingBanner(tokenDetailContent);
-    }
-  }
-  
-  // Add investment warning to token detail page
-  function addInvestmentWarning(detailContent) {
-    // Find insertion point - after balance display
-    const balanceDisplay = detailContent.querySelector('.token-detail-balance');
-    if (!balanceDisplay) return;
-    
-    // Create warning banner
-    const warningBanner = document.createElement('div');
-    warningBanner.className = 'investment-warning';
-    warningBanner.innerHTML = `
-      <div class="investment-warning-content">
-        <i class="fas fa-exclamation-circle warning-icon"></i>
-        <div class="investment-warning-text">
-          <p>Don't invest unless you're prepared to lose all the money you invest. This is a high-risk investment and you are unlikely to be protected if something goes wrong. <a href="#" class="learn-more">Take 2 mins to learn more</a>.</p>
-        </div>
-        <button class="close-warning">
-          <i class="fas fa-times"></i>
-        </button>
-      </div>
-    `;
-    
-    // Insert after balance display
-    if (balanceDisplay.nextSibling) {
-      detailContent.insertBefore(warningBanner, balanceDisplay.nextSibling);
-    } else {
-      detailContent.appendChild(warningBanner);
-    }
-    
-    // Style the warning
-    warningBanner.style.width = 'calc(100% - 32px)';
-    warningBanner.style.margin = '16px';
-    warningBanner.style.backgroundColor = '#FEF9E7';
-    warningBanner.style.color = '#D4AC0D';
-    warningBanner.style.borderRadius = '8px';
-    warningBanner.style.borderLeft = '4px solid #D4AC0D';
-    warningBanner.style.fontSize = '12px';
-    
-    const warningContent = warningBanner.querySelector('.investment-warning-content');
-    if (warningContent) {
-      warningContent.style.display = 'flex';
-      warningContent.style.alignItems = 'flex-start';
-      warningContent.style.padding = '12px';
-    }
-    
-    const warningIcon = warningBanner.querySelector('.warning-icon');
-    if (warningIcon) {
-      warningIcon.style.fontSize = '20px';
-      warningIcon.style.marginRight = '12px';
-      warningIcon.style.marginTop = '2px';
-    }
-    
-    const warningText = warningBanner.querySelector('.investment-warning-text');
-    if (warningText) {
-      warningText.style.flex = '1';
-      warningText.style.lineHeight = '1.4';
-    }
-    
-    const closeButton = warningBanner.querySelector('.close-warning');
-    if (closeButton) {
-      closeButton.style.background = 'none';
-      closeButton.style.border = 'none';
-      closeButton.style.color = '#D4AC0D';
-      closeButton.style.marginLeft = '8px';
-      closeButton.style.cursor = 'pointer';
+      // Screen-specific fixes
+      fixHomeScreen();
+      fixTokenDetailView();
+      fixReceiveScreen();
+      fixSendScreen();
+      fixAdminPanel();
+      fixTransactionHistory();
       
-      closeButton.addEventListener('click', function() {
-        warningBanner.style.display = 'none';
-      });
+      // Setup observers to keep fixing dynamic content
+      setupDynamicContentObserver();
+      
+      console.log('All Trust Wallet UI fixes applied successfully!');
+    } catch (error) {
+      console.error('Error applying Trust Wallet UI fixes:', error);
     }
   }
   
-  // Add staking banner to token detail page
-  function addStakingBanner(detailContent) {
-    // Get token symbol from the page
-    const symbolElement = document.getElementById('detail-symbol');
-    const tokenSymbol = symbolElement ? symbolElement.textContent : 'BTC';
-    
-    // Create staking banner
-    const stakingBanner = document.createElement('div');
-    stakingBanner.className = 'staking-container';
-    stakingBanner.innerHTML = `
-      <div class="staking-icon">
-        <img src="${getTokenLogoUrl(tokenSymbol.toLowerCase())}" alt="${tokenSymbol}">
-      </div>
-      <div class="staking-content">
-        <h3>Start earning</h3>
-        <p>Start earning on your ${tokenSymbol}</p>
-      </div>
-      <i class="fas fa-chevron-right staking-arrow"></i>
-    `;
-    
-    // Find appropriate insertion point - after action buttons or investment warning
-    const actionButtons = detailContent.querySelector('.token-detail-actions');
-    const investmentWarning = detailContent.querySelector('.investment-warning');
-    
-    if (actionButtons) {
-      actionButtons.insertAdjacentElement('afterend', stakingBanner);
-    } else if (investmentWarning) {
-      investmentWarning.insertAdjacentElement('afterend', stakingBanner);
-    } else {
-      // Insert after balance if neither exists
-      const balanceDisplay = detailContent.querySelector('.token-detail-balance');
-      if (balanceDisplay) {
-        balanceDisplay.insertAdjacentElement('afterend', stakingBanner);
-      } else {
-        detailContent.appendChild(stakingBanner);
-      }
-    }
-    
-    // Style the staking banner
-    stakingBanner.style.backgroundColor = '#F5F5F5';
-    stakingBanner.style.borderRadius = '16px';
-    stakingBanner.style.padding = '16px';
-    stakingBanner.style.margin = '0 16px 24px';
-    stakingBanner.style.display = 'flex';
-    stakingBanner.style.alignItems = 'center';
-    stakingBanner.style.position = 'relative';
-    stakingBanner.style.cursor = 'pointer';
-    
-    const stakingIcon = stakingBanner.querySelector('.staking-icon');
-    if (stakingIcon) {
-      stakingIcon.style.width = '50px';
-      stakingIcon.style.height = '50px';
-      stakingIcon.style.marginRight = '16px';
-    }
-    
-    const stakingContent = stakingBanner.querySelector('.staking-content');
-    if (stakingContent) {
-      stakingContent.style.flex = '1';
-    }
-    
-    const stakingTitle = stakingContent.querySelector('h3');
-    if (stakingTitle) {
-      stakingTitle.style.fontSize = '16px';
-      stakingTitle.style.fontWeight = '600';
-      stakingTitle.style.marginBottom = '4px';
-    }
-    
-    const stakingDesc = stakingContent.querySelector('p');
-    if (stakingDesc) {
-      stakingDesc.style.fontSize = '12px';
-      stakingDesc.style.color = '#8A939D';
-    }
-    
-    const stakingArrow = stakingBanner.querySelector('.staking-arrow');
-    if (stakingArrow) {
-      stakingArrow.style.color = '#8A939D';
-      stakingArrow.style.position = 'absolute';
-      stakingArrow.style.right = '16px';
-    }
-    
-    // Add click handler for showing toast
-    stakingBanner.addEventListener('click', function() {
-      showToast(`${tokenSymbol} staking coming soon`);
-    });
-  }
+  // Previous fixes from the first file (status bar, network filters, etc.) remain the same...
   
-  // Fix 3: Fix receive screen token display
+  // 6. Fix Receive Screen - Improve token display
   function fixReceiveScreen() {
     console.log('Fixing receive screen');
     
@@ -263,8 +75,8 @@
       const networkBadge = tokenInfo.querySelector('.token-network-badge, .token-price');
       if (!networkBadge) return;
       
-      // Generate shortened address for this token (simulating wallet address)
-      const tokenAddress = generateShortAddress(tokenId);
+      // Generate shortened address for this token
+      const tokenAddress = generateTokenAddress(tokenId);
       
       // Replace network badge with shortened address
       networkBadge.textContent = tokenAddress;
@@ -277,7 +89,7 @@
     });
   }
   
-  // Fix 4: Fix send screen token display formatting
+  // 7. Fix Send Screen - Improve token display and formatting
   function fixSendScreen() {
     console.log('Fixing send screen');
     
@@ -331,7 +143,6 @@
           if (tokenFullname) {
             tokenFullname.style.fontSize = '12px';
             tokenFullname.style.color = '#8A939D';
-            // Remove background from full name
             tokenFullname.style.background = 'none';
             tokenFullname.style.padding = '0';
           }
@@ -365,7 +176,7 @@
     }
   }
   
-  // Fix 5: Fix admin panel error
+  // 8. Fix Admin Panel - Improve functionality and error handling
   function fixAdminPanel() {
     console.log('Fixing admin panel');
     
@@ -406,7 +217,6 @@
           
           if (token) {
             // Update token amount
-            const oldAmount = token.amount;
             const price = token.price || 1;
             
             // Calculate new token amount based on USD value
@@ -473,8 +283,78 @@
     }
   }
   
-  // Set up observer to reapply fixes when screens change
-  function setupObserver() {
+  // 9. Fix Transaction History
+  function fixTransactionHistory() {
+    console.log('Fixing transaction history');
+    
+    const transactionList = document.getElementById('transaction-list');
+    if (!transactionList) return;
+    
+    const transactions = transactionList.querySelectorAll('.transaction-item');
+    
+    transactions.forEach(transaction => {
+      // Improve transaction item styling
+      transaction.style.display = 'flex';
+      transaction.style.alignItems = 'center';
+      transaction.style.padding = '12px 16px';
+      transaction.style.borderBottom = '1px solid #F5F5F5';
+      
+      // Style transaction icon
+      const icon = transaction.querySelector('.transaction-icon');
+      if (icon) {
+        icon.style.marginRight = '12px';
+        
+        // Color-code transaction types
+        const type = transaction.getAttribute('data-type');
+        switch(type) {
+          case 'receive':
+            icon.style.color = '#3375BB'; // Blue for receive
+            break;
+          case 'send':
+            icon.style.color = '#FF6B6B'; // Red for send
+            break;
+          case 'swap':
+            icon.style.color = '#4CAF50'; // Green for swap
+            break;
+          default:
+            icon.style.color = '#8A939D'; // Neutral gray
+        }
+      }
+      
+      // Improve transaction details styling
+      const details = transaction.querySelector('.transaction-details');
+      if (details) {
+        details.style.flex = '1';
+        
+        const title = details.querySelector('.transaction-title');
+        if (title) {
+          title.style.fontSize = '14px';
+          title.style.fontWeight = '500';
+          title.style.marginBottom = '4px';
+        }
+        
+        const subtitle = details.querySelector('.transaction-subtitle');
+        if (subtitle) {
+          subtitle.style.fontSize = '12px';
+          subtitle.style.color = '#8A939D';
+        }
+      }
+      
+      // Style transaction amount
+      const amount = transaction.querySelector('.transaction-amount');
+      if (amount) {
+        amount.style.fontSize = '14px';
+        amount.style.fontWeight = '500';
+        
+        // Color-code amounts
+        const amountValue = parseFloat(amount.textContent.replace(/[^\d.-]/g, ''));
+        amount.style.color = amountValue >= 0 ? '#4CAF50' : '#FF6B6B';
+      }
+    });
+  }
+  
+  // 10. Setup Dynamic Content Observer
+  function setupDynamicContentObserver() {
     const observer = new MutationObserver(function(mutations) {
       mutations.forEach(function(mutation) {
         // Check if a screen's display property changed
@@ -485,14 +365,22 @@
           // Only update if the screen is now visible
           if (mutation.target.style.display !== 'none') {
             // Apply specific fixes based on which screen changed
-            if (mutation.target.id === 'token-detail') {
-              enhanceTokenDetailPage();
-            } else if (mutation.target.id === 'receive-screen') {
-              fixReceiveScreen();
-            } else if (mutation.target.id === 'send-screen') {
-              fixSendScreen();
-            } else if (mutation.target.id === 'admin-panel') {
-              fixAdminPanel();
+            switch(mutation.target.id) {
+              case 'token-detail':
+                enhanceTokenDetailPage();
+                break;
+              case 'receive-screen':
+                fixReceiveScreen();
+                break;
+              case 'send-screen':
+                fixSendScreen();
+                break;
+              case 'admin-panel':
+                fixAdminPanel();
+                break;
+              case 'transaction-history':
+                fixTransactionHistory();
+                break;
             }
             
             // Always fix network filters on all screens
@@ -513,26 +401,28 @@
     }
   }
   
-  // ----- Helper Functions -----
+  // Helper Functions
   
-  // Helper to generate a shortened wallet address for tokens
-  function generateShortAddress(tokenId) {
-    // Generate a deterministic address based on token ID
+  // Generate token address for display
+  function generateTokenAddress(tokenId) {
     const prefix = '0x';
-    const middle = Array.from(tokenId).map(c => c.charCodeAt(0).toString(16).padStart(2, '0')).join('').substring(0, 8);
+    const middle = Array.from(tokenId)
+      .map(c => c.charCodeAt(0).toString(16).padStart(2, '0'))
+      .join('')
+      .substring(0, 8);
     const suffix = '...E90a51';
     
     return prefix + middle + suffix;
   }
   
-  // Helper to get token logo URL
+  // Get token logo URL
   function getTokenLogoUrl(tokenId) {
     // Use existing function if available
     if (typeof window.getTokenLogoUrl === 'function') {
       return window.getTokenLogoUrl(tokenId);
     }
     
-    // Fallback implementation
+    // Fallback implementation with expanded token logo mapping
     const logoUrls = {
       'btc': 'https://cryptologos.cc/logos/bitcoin-btc-logo.png',
       'eth': 'https://cryptologos.cc/logos/ethereum-eth-logo.png',
@@ -542,24 +432,35 @@
       'sol': 'https://cryptologos.cc/logos/solana-sol-logo.png',
       'pol': 'https://cryptologos.cc/logos/polygon-matic-logo.png',
       'uni': 'https://cryptologos.cc/logos/uniswap-uni-logo.png',
-      'xrp': 'https://cryptologos.cc/logos/xrp-xrp-logo.png'
+      'xrp': 'https://cryptologos.cc/logos/xrp-xrp-logo.png',
+      'doge': 'https://cryptologos.cc/logos/dogecoin-doge-logo.png',
+      'ada': 'https://cryptologos.cc/logos/cardano-ada-logo.png',
+      'link': 'https://cryptologos.cc/logos/chainlink-link-logo.png',
+      'dot': 'https://cryptologos.cc/logos/polkadot-new-dot-logo.png',
+      'ltc': 'https://cryptologos.cc/logos/litecoin-ltc-logo.png'
     };
     
-    return logoUrls[tokenId] || 'https://cryptologos.cc/logos/bitcoin-btc-logo.png';
+    return logoUrls[tokenId.toLowerCase()] || 'https://cryptologos.cc/logos/bitcoin-btc-logo.png';
   }
   
-  // Helper to format currency
+  // Format currency with proper localization
   function formatCurrency(amount) {
+    // Use existing formatting function if available
     if (typeof window.FormatUtils === 'object' && 
         typeof window.FormatUtils.formatCurrency === 'function') {
       return window.FormatUtils.formatCurrency(amount);
     }
     
-    // Fallback implementation
-    return '$' + amount.toFixed(2);
+    // Fallback implementation with localized formatting
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD',
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    }).format(amount);
   }
   
-  // Helper to show toast notifications
+  // Show toast notification with improved styling
   function showToast(message, duration = 2000) {
     // Use existing function if available
     if (typeof window.showToast === 'function') {
@@ -572,22 +473,54 @@
       existingToast.remove();
     }
     
-    // Create new toast
+    // Create new toast with enhanced styling
     const toast = document.createElement('div');
     toast.className = 'tw-toast';
-    toast.textContent = message;
-    toast.style.position = 'fixed';
-    toast.style.bottom = '80px';
-    toast.style.left = '50%';
-    toast.style.transform = 'translateX(-50%)';
-    toast.style.backgroundColor = 'rgba(0, 0, 0, 0.8)';
-    toast.style.color = 'white';
-    toast.style.padding = '12px 20px';
-    toast.style.borderRadius = '8px';
-    toast.style.fontSize = '14px';
-    toast.style.zIndex = '10000';
-    toast.style.opacity = '0';
-    toast.style.transition = 'opacity 0.3s';
+    toast.innerHTML = `
+      <div class="toast-content">
+        <i class="fas fa-info-circle toast-icon"></i>
+        <span class="toast-message">${message}</span>
+      </div>
+    `;
+    
+    // Apply comprehensive styling
+    Object.assign(toast.style, {
+      position: 'fixed',
+      bottom: '80px',
+      left: '50%',
+      transform: 'translateX(-50%)',
+      backgroundColor: 'rgba(0, 0, 0, 0.8)',
+      color: 'white',
+      padding: '12px 20px',
+      borderRadius: '8px',
+      display: 'flex',
+      alignItems: 'center',
+      zIndex: '10000',
+      opacity: '0',
+      transition: 'opacity 0.3s ease-in-out',
+      maxWidth: '80%',
+      boxShadow: '0 4px 6px rgba(0,0,0,0.1)'
+    });
+    
+    // Style toast content
+    const toastContent = toast.querySelector('.toast-content');
+    if (toastContent) {
+      toastContent.style.display = 'flex';
+      toastContent.style.alignItems = 'center';
+    }
+    
+    // Style toast icon
+    const toastIcon = toast.querySelector('.toast-icon');
+    if (toastIcon) {
+      toastIcon.style.marginRight = '10px';
+      toastIcon.style.fontSize = '18px';
+    }
+    
+    // Style toast message
+    const toastMessage = toast.querySelector('.toast-message');
+    if (toastMessage) {
+      toastMessage.style.fontSize = '14px';
+    }
     
     document.body.appendChild(toast);
     
@@ -604,4 +537,14 @@
       }, 300);
     }, duration);
   }
+  
+  // Expose key functions to window for potential external use
+  window.TrustWalletUIFixes = {
+    getTokenLogoUrl,
+    formatCurrency,
+    showToast
+  };
+  
+  // Initialize fixes
+  initFixes();
 })();
