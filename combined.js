@@ -1729,7 +1729,7 @@ window.BottomNavigation = {
         <img src="assets/icons/${tab.icon}" alt="${tab.label}">
         <span>${tab.label}</span>
       `;
-      button.addEventListener('click',button.addEventListener('click', () => this.switchTab(tab.id));
+      button.addEventListener('click', () => this.switchTab(tab.id));
       nav.appendChild(button);
     });
     
