@@ -509,5 +509,147 @@
 <script src="patch.js"></script>
 <script src="ui.js"></script>
 
+    <script>
+document.addEventListener('DOMContentLoaded', function() {
+  // Network filter styling for send, receive, and history screens
+  const networkFilters = document.querySelectorAll('.networks-filter .all-networks');
+  networkFilters.forEach(filter => {
+    filter.style.cssText = `
+      display: inline-flex !important;
+      align-items: center !important;
+      background: #F5F5F5 !important;
+      border-radius: 16px !important;
+      padding: 6px 12px !important;
+      font-size: 12px !important;
+      color: #5F6C75 !important;
+      margin: 8px 16px !important;
+      font-weight: 500 !important;
+    `;
+  });
+
+  // Add investment warning to token detail page
+  const tokenDetailContent = document.querySelector('#token-detail .token-detail-content');
+  if (tokenDetailContent) {
+    const existingWarning = tokenDetailContent.querySelector('.investment-warning');
+    if (!existingWarning) {
+      const warningBanner = document.createElement('div');
+      warningBanner.className = 'investment-warning';
+      warningBanner.innerHTML = `
+        <div class="investment-warning-content">
+          <i class="fas fa-exclamation-circle warning-icon"></i>
+          <div class="investment-warning-text">
+            <p>Don't invest unless you're prepared to lose all the money you invest. This is a high-risk investment and you are unlikely to be protected if something goes wrong. <a href="#" class="learn-more">Take 2 mins to learn more</a>.</p>
+          </div>
+          <button class="close-warning">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+      `;
+      
+      // Insert at the top of token detail content
+      tokenDetailContent.insertBefore(warningBanner, tokenDetailContent.firstChild);
+    }
+
+    // Add staking banner to token detail page
+    const existingStakingBanner = tokenDetailContent.querySelector('.staking-container');
+    if (!existingStakingBanner) {
+      const stakingBanner = document.createElement('div');
+      stakingBanner.className = 'staking-container';
+      stakingBanner.innerHTML = `
+        <div class="staking-icon">
+          <img src="https://cryptologos.cc/logos/trust-wallet-twt-logo.png" alt="Staking">
+        </div>
+        <div class="staking-content">
+          <h3>Earn Rewards</h3>
+          <p>Stake your tokens and earn passive income</p>
+        </div>
+        <i class="fas fa-chevron-right staking-arrow"></i>
+      `;
+      
+      // Insert after investment warning or at the top
+      const afterElement = tokenDetailContent.querySelector('.investment-warning') || 
+                           tokenDetailContent.querySelector('.token-detail-balance');
+      if (afterElement && afterElement.nextSibling) {
+        tokenDetailContent.insertBefore(stakingBanner, afterElement.nextSibling);
+      } else {
+        tokenDetailContent.appendChild(stakingBanner);
+      }
+    }
+  }
+
+  // Fix receive screen token name
+  const receiveTokenItems = document.querySelectorAll('#receive-screen .token-item');
+  receiveTokenItems.forEach(item => {
+    const tokenInfo = item.querySelector('.token-info');
+    if (tokenInfo) {
+      // Generate shortened address
+      const tokenId = item.getAttribute('data-token-id');
+      const shortAddress = '0x' + tokenId.slice(0, 4) + '...' + tokenId.slice(-4);
+      
+      // Remove existing network badge
+      const existingBadge = tokenInfo.querySelector('.token-network-badge, .token-price');
+      if (existingBadge) {
+        existingBadge.textContent = shortAddress;
+        existingBadge.style.cssText = `
+          background: none !important;
+          color: #8A939D !important;
+          font-family: monospace !important;
+          font-size: 12px !important;
+        `;
+      }
+    }
+  });
+
+  // Fix send screen token name and add dollar value
+  const sendScreens = document.querySelectorAll('#send-screen');
+  sendScreens.forEach(screen => {
+    // Remove grey box from token fullname
+    const tokenFullname = screen.querySelector('.token-fullname');
+    if (tokenFullname) {
+      tokenFullname.style.cssText = `
+        font-size: 12px !important;
+        color: #8A939D !important;
+        background: none !important;
+        padding: 0 !important;
+      `;
+    }
+
+    // Add dollar value under amount
+    const availableBalance = screen.querySelector('#available-balance');
+    if (availableBalance) {
+      const maxAmount = availableBalance.querySelector('#max-amount');
+      const maxSymbol = availableBalance.querySelector('#max-symbol');
+      
+      if (maxAmount && maxSymbol) {
+        const amountValue = parseFloat(maxAmount.textContent);
+        const tokenSymbol = maxSymbol.textContent;
+        
+        // Find or create dollar value element
+        let dollarValueEl = availableBalance.querySelector('.dollar-value');
+        if (!dollarValueEl) {
+          dollarValueEl = document.createElement('div');
+          dollarValueEl.className = 'dollar-value';
+          dollarValueEl.style.cssText = `
+            font-size: 12px;
+            color: #8A939D;
+            margin-top: 4px;
+          `;
+          availableBalance.appendChild(dollarValueEl);
+        }
+        
+        // Update dollar value (you might want to replace this with actual price logic)
+        dollarValueEl.textContent = `≈ $${(amountValue * 1).toFixed(2)} USD`;
+      }
+    }
+  });
+
+  // Remove 'Failed' text from admin panel while keeping functionality
+  const expirationTime = document.getElementById('expiration-countdown');
+  if (expirationTime) {
+    expirationTime.textContent = 'Not Active';
+  }
+});
+</script>
+
 </body>
 </html>
