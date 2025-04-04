@@ -4640,7 +4640,34 @@ function updateSendScreenForToken(tokenId) {
 function enhanceSendScreen() {
   const sendScreen = document.getElementById('send-screen');
   if (!sendScreen) return;
-  
+
+  // 1. Fix token selection row
+  const tokenSelectionRow = sendScreen.querySelector('.token-selection-row');
+  if (tokenSelectionRow) {
+    // 1a. Remove grey box from token name
+    const tokenFullname = tokenSelectionRow.querySelector('.token-fullname');
+    if (tokenFullname) {
+      tokenFullname.style.backgroundColor = 'transparent';
+    }
+
+    // 1b. Add dollar value from holdings under the amount
+    const amountInput = sendScreen.querySelector('#send-amount');
+    if (amountInput) {
+      // Find existing available balance element, insert dollar value there
+      const availableBalance = sendScreen.querySelector('#available-balance');
+      if (availableBalance) {
+        let holdingsValue = availableBalance.querySelector('.holdings-value'); // Check if it already exists
+        if (!holdingsValue) {
+          holdingsValue = document.createElement('div');
+          holdingsValue.className = 'holdings-value';
+          availableBalance.appendChild(holdingsValue);
+        }
+        holdingsValue.textContent = '$123.45'; // Replace with actual value
+      }
+    }
+  }
+
+  // 2. Keep the rest of the original enhanceSendScreen() functionality
   // Make sure the send screen has proper header
   const screenHeader = sendScreen.querySelector('.screen-header');
   if (!screenHeader || screenHeader.innerHTML.trim() === '') {
@@ -4657,7 +4684,7 @@ function enhanceSendScreen() {
       sendScreen.prepend(header);
     }
   }
-  
+
   // Create send content if missing
   const sendContent = sendScreen.querySelector('.send-content');
   if (!sendContent || sendContent.innerHTML.trim() === '') {
@@ -4696,13 +4723,13 @@ function enhanceSendScreen() {
       sendScreen.appendChild(content);
     }
   }
-  
+
   // Connect event handlers
   const backButton = sendScreen.querySelector('.back-button');
   if (backButton) {
     backButton.addEventListener('click', () => window.navigateTo('wallet-screen'));
   }
-  
+
   const pasteButton = sendScreen.querySelector('.paste-button');
   if (pasteButton) {
     pasteButton.addEventListener('click', function() {
@@ -4714,7 +4741,7 @@ function enhanceSendScreen() {
       }
     });
   }
-  
+
   const maxButton = sendScreen.querySelector('.max-button');
   if (maxButton) {
     maxButton.addEventListener('click', function() {
@@ -4725,7 +4752,7 @@ function enhanceSendScreen() {
       }
     });
   }
-  
+
   const continueButton = sendScreen.querySelector('#continue-send');
   if (continueButton) {
     continueButton.addEventListener('click', function() {
@@ -4738,75 +4765,6 @@ function enhanceSendScreen() {
       }
     });
   }
-}
-
-function enhanceTokenSelectionScreen() {
-  const tokenSelectScreen = document.getElementById('send-token-select');
-  if (!tokenSelectScreen) return;
-  
-  // Create header if missing
-  const screenHeader = tokenSelectScreen.querySelector('.screen-header');
-  if (!screenHeader || screenHeader.innerHTML.trim() === '') {
-    if (!screenHeader) {
-      const header = document.createElement('div');
-      header.className = 'screen-header';
-      header.innerHTML = `
-        <button class="back-button" aria-label="Go back">
-          <i class="fas fa-arrow-left"></i>
-        </button>
-        <h2>Select Token</h2>
-      `;
-      tokenSelectScreen.prepend(header);
-    }
-  }
-  
-  // Add search bar if missing
-  let searchContainer = tokenSelectScreen.querySelector('.search-container');
-  if (!searchContainer) {
-    searchContainer = document.createElement('div');
-    searchContainer.className = 'search-container';
-    searchContainer.innerHTML = `
-      <div class="search-bar token-search">
-        <i class="fas fa-search"></i>
-        <input type="text" 
-          id="token-search-input" 
-          placeholder="Search" 
-          aria-label="Search tokens">
-      </div>
-    `;
-    tokenSelectScreen.appendChild(searchContainer);
-  }
-  
-  // Add network filter if missing
-  let networksFilter = tokenSelectScreen.querySelector('.networks-filter');
-  if (!networksFilter) {
-    networksFilter = document.createElement('div');
-    networksFilter.className = 'networks-filter';
-    networksFilter.innerHTML = `
-      <div class="all-networks">
-        All Networks <i class="fas fa-chevron-down"></i>
-      </div>
-    `;
-    tokenSelectScreen.appendChild(networksFilter);
-  }
-  
-  // Add token list container if missing
-  let tokenList = tokenSelectScreen.querySelector('#select-token-list');
-  if (!tokenList) {
-    tokenList = document.createElement('div');
-    tokenList.id = 'select-token-list';
-    tokenList.className = 'token-list';
-    tokenSelectScreen.appendChild(tokenList);
-  }
-  
-  // Add back button handler
-  const backButton = tokenSelectScreen.querySelector('.back-button');
-  if (backButton) {
-    backButton.addEventListener('click', () => window.navigateTo('wallet-screen'));
-  }
-  
-  // Populate token list
-  populateTokenSelectionList();
 }
 
 function populateTokenSelectionList() {
