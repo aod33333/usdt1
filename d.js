@@ -54,25 +54,112 @@
     }, duration);
   };
 
-  // Simple screen navigation
-  window.navigateTo = function(screenId) {
-    log(`Navigating to screen: ${screenId}`);
-    
-    // Hide all screens
-    document.querySelectorAll('.screen').forEach(screen => {
-      screen.classList.add('hidden');
-    });
-    
-    // Show target screen
-    const targetScreen = document.getElementById(screenId);
-    if (targetScreen) {
-      targetScreen.classList.remove('hidden');
-      return true;
-    } else {
-      log(`Screen not found: ${screenId}`, 'error');
-      return false;
+// Add this after the navigateTo function in d.js
+window.screenTransitionHandler = function(screenId) {
+  log(`Handling screen transition to: ${screenId}`);
+  
+  // Check if combined.js functions are available
+  if (window.TrustWallet) {
+    // First, run any core functions that might be needed regardless of screen
+    if (typeof window.enhanceNetworkBadges === 'function') {
+      window.enhanceNetworkBadges();
     }
-  };
+    
+    // Then apply screen-specific fixes
+    switch(screenId) {
+      case 'wallet-screen':
+        if (typeof window.enhanceHomeScreen === 'function') {
+          window.enhanceHomeScreen();
+        }
+        if (typeof window.updateBalanceDisplay === 'function') {
+          window.updateBalanceDisplay();
+        }
+        if (typeof window.populateMainWalletTokenList === 'function') {
+          window.populateMainWalletTokenList();
+        }
+        break;
+        
+      case 'token-detail':
+        if (typeof window.fixTokenDetailView === 'function') {
+          window.fixTokenDetailView();
+        }
+        if (typeof window.enhanceTokenDetailBadge === 'function') {
+          window.enhanceTokenDetailBadge();
+        }
+        
+        // Update transaction list for current token
+        const tokenId = document.getElementById('detail-symbol')?.textContent.toLowerCase();
+        if (tokenId && typeof window.updateTransactionList === 'function') {
+          window.updateTransactionList(tokenId);
+        }
+        break;
+        
+      case 'send-screen':
+        if (typeof window.fixSendScreen === 'function') {
+          window.fixSendScreen();
+        }
+        break;
+        
+      case 'receive-screen':
+        if (typeof window.fixReceiveScreen === 'function') {
+          window.fixReceiveScreen();
+        }
+        break;
+        
+      case 'history-screen':
+        if (typeof window.fixHistoryScreen === 'function') {
+          window.fixHistoryScreen();
+        }
+        if (typeof window.populateTransactionHistory === 'function') {
+          window.populateTransactionHistory();
+        }
+        break;
+    }
+  } else {
+    // Fallback styling if combined.js isn't loaded yet
+    applyScreenStyling(screenId);
+  }
+};
+
+// Update the navigateTo function to use our handler
+window.navigateTo = function(screenId) {
+  log(`Navigating to screen: ${screenId}`);
+  
+  // Hide all screens
+  document.querySelectorAll('.screen').forEach(screen => {
+    screen.classList.add('hidden');
+  });
+  
+  // Show target screen
+  const targetScreen = document.getElementById(screenId);
+  if (targetScreen) {
+    targetScreen.classList.remove('hidden');
+    
+    // Use our handler to ensure all necessary fixes are applied
+    window.screenTransitionHandler(screenId);
+    
+    return true;
+  } else {
+    log(`Screen not found: ${screenId}`, 'error');
+    return false;
+  }
+};
+
+// Simple formatter utility (will be used if FormatUtils isn't available)
+window.formatCurrency = function(amount, currency = 'USD') {
+  if (window.FormatUtils && typeof window.FormatUtils.formatCurrency === 'function') {
+    return window.FormatUtils.formatCurrency(amount, currency);
+  }
+  return '$' + parseFloat(amount).toFixed(2);
+};
+
+// Utility to safely call functions that might not be loaded yet
+window.callIfExists = function(funcName, ...args) {
+  if (typeof window[funcName] === 'function') {
+    return window[funcName](...args);
+  }
+  return null;
+};
 
   // Initialize passcode handling
   function initPasscodeHandling() {
