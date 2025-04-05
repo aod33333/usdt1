@@ -1109,6 +1109,19 @@ img[src*="bnb-bnb-logo"] {
     line-height: 1.5;
 }
 
+.price-chart-container {
+    padding: 16px;
+    height: 200px;
+    position: relative;
+    border-top: 1px solid var(--tw-bg-gray);
+    margin-top: 16px;
+}
+
+#price-chart {
+    width: 100% !important;
+    height: 100% !important;
+}
+
 /* Important: Remove network badges in detail view */
 #token-detail .chain-badge,
 #token-detail .chain-badge-fixed,
@@ -2147,17 +2160,4 @@ button, .token-item, .transaction-item {
 /* Consistent icon sizes */
 i[class^="bi-"] {
   font-size: 20px !important; /* Bootstrap icons size fix */
-}
-
-.price-chart-container {
-    padding: 16px;
-    height: 200px;
-    position: relative;
-    border-top: 1px solid var(--tw-bg-gray);
-    margin-top: 16px;
-}
-
-#price-chart {
-    width: 100% !important;
-    height: 100% !important;
 }
