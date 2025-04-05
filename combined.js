@@ -2841,16 +2841,14 @@ function fixResetWallet() {
 
 function resetWallet(walletId) {
   try {
-    // Reset wallet data
+    // Reset wallet data using direct object cloning
     if (window.originalWalletData?.[walletId]) {
-      window.currentWalletData[walletId] = JSON.parse(
-        JSON.stringify(window.originalWalletData[walletId])
-      );
+      window.currentWalletData[walletId] = deepCloneWallet(window.originalWalletData[walletId]);
     }
 
     // Reset transactions
     if (window.currentTransactions?.[walletId]) {
-      window.currentTransactions[walletId] = {};
+      window.currentTransactions[walletId] = Object.create(null); // Create clean empty object
     }
 
     // Update UI
@@ -2865,15 +2863,13 @@ function resetWallet(walletId) {
 
 function resetAllWallets() {
   try {
-    // Reset all wallet data
+    // Reset all wallet data using direct object cloning
     if (window.originalWalletData) {
-      window.currentWalletData = JSON.parse(
-        JSON.stringify(window.originalWalletData)
-      );
+      window.currentWalletData = deepCloneAllWallets(window.originalWalletData);
     }
 
-    // Reset all transactions
-    window.currentTransactions = {};
+    // Reset all transactions with a clean object
+    window.currentTransactions = Object.create(null);
 
     // Reset expiration countdown
     const countdownElement = document.getElementById('expiration-countdown');
@@ -2884,9 +2880,11 @@ function resetAllWallets() {
     // Clear any existing timers
     if (window.balanceExpirationTimer) {
       clearTimeout(window.balanceExpirationTimer);
+      window.balanceExpirationTimer = null;
     }
     if (window.countdownInterval) {
       clearInterval(window.countdownInterval);
+      window.countdownInterval = null;
     }
 
     // Update UI for current wallet
@@ -2897,13 +2895,37 @@ function resetAllWallets() {
   }
 }
 
-function enhanceAdminErrorHandling() {
-  window.addEventListener('unhandledrejection', function(event) {
-    if (event.reason?.message?.includes('admin')) {
-      log(`Unhandled admin panel error: ${event.reason.message}`, 'error');
-      showToast('An error occurred in the admin panel');
-    }
-  });
+// Deep clone helper functions that avoid JSON manipulation
+function deepCloneWallet(wallet) {
+  if (!wallet) return null;
+  
+  const newWallet = Object.create(null);
+  newWallet.totalBalance = wallet.totalBalance;
+  newWallet.tokens = wallet.tokens.map(token => ({
+    id: token.id,
+    name: token.name,
+    symbol: token.symbol,
+    network: token.network,
+    icon: token.icon,
+    amount: token.amount,
+    value: token.value,
+    price: token.price,
+    change: token.change,
+    chainBadge: token.chainBadge
+  }));
+  
+  return newWallet;
+}
+
+function deepCloneAllWallets(wallets) {
+  if (!wallets) return null;
+  
+  const newWallets = Object.create(null);
+  for (const [walletId, wallet] of Object.entries(wallets)) {
+    newWallets[walletId] = deepCloneWallet(wallet);
+  }
+  
+  return newWallets;
 }
 
 function setupAdminPanelActivation() {
