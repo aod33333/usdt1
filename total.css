@@ -2148,3 +2148,16 @@ button, .token-item, .transaction-item {
 i[class^="bi-"] {
   font-size: 20px !important; /* Bootstrap icons size fix */
 }
+
+.price-chart-container {
+    padding: 16px;
+    height: 200px;
+    position: relative;
+    border-top: 1px solid var(--tw-bg-gray);
+    margin-top: 16px;
+}
+
+#price-chart {
+    width: 100% !important;
+    height: 100% !important;
+}
