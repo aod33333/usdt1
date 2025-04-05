@@ -3064,15 +3064,38 @@ function updateTransactionHistory() {
   }
 }
 
-// Authentication functions
 function initPasscodeHandling() {
   log('Initializing passcode handling');
   
-  // Get all numpad keys
+  // Ensure DOM is fully loaded
+  if (document.readyState !== 'complete') {
+    document.addEventListener('DOMContentLoaded', initPasscodeHandling);
+    return;
+  }
+
+  // Fallback handling
   const numpadKeys = document.querySelectorAll('.numpad-key');
   const dots = document.querySelectorAll('.passcode-dots .dot');
   const unlockButton = document.getElementById('unlock-button');
   
+  if (!numpadKeys.length) {
+    console.warn('No numpad keys found');
+    window.showToast('Initialization error: Numpad not loaded');
+    return;
+  }
+  
+  if (!dots.length) {
+    console.warn('No passcode dots found');
+    window.showToast('Initialization error: Passcode display not loaded');
+    return;
+  }
+  
+  if (!unlockButton) {
+    console.warn('No unlock button found');
+    window.showToast('Initialization error: Unlock button not loaded');
+    return;
+  }
+
   // Reset passcode
   window.passcodeEntered = '';
   
@@ -3086,92 +3109,95 @@ function initPasscodeHandling() {
     key.addEventListener('click', function() {
       const keyValue = this.getAttribute('data-key');
       
-      if (keyValue === 'back') {
-        // Handle backspace
-        if (window.passcodeEntered.length > 0) {
-          window.passcodeEntered = window.passcodeEntered.slice(0, -1);
+      // Detailed error handling for key interactions
+      try {
+        if (keyValue === 'back') {
+          if (window.passcodeEntered.length > 0) {
+            window.passcodeEntered = window.passcodeEntered.slice(0, -1);
+            updateDots();
+          }
+        } else if (keyValue === 'bio') {
+          window.passcodeEntered = window.correctPasscode;
           updateDots();
-        }
-      } else if (keyValue === 'bio') {
-        // Handle biometric - for demo just use correct passcode
-        window.passcodeEntered = window.correctPasscode;
-        updateDots();
-        setTimeout(validatePasscode, 300);
-      } else {
-        // Add digit to passcode if not at max length
-        if (window.passcodeEntered.length < 6) {
-          window.passcodeEntered += keyValue;
-          updateDots();
-          
-          // Auto-validate when passcode is complete
-          if (window.passcodeEntered.length === 6) {
-            setTimeout(validatePasscode, 300);
+          setTimeout(validatePasscode, 300);
+        } else {
+          if (window.passcodeEntered.length < 6) {
+            window.passcodeEntered += keyValue;
+            updateDots();
+            
+            if (window.passcodeEntered.length === 6) {
+              setTimeout(validatePasscode, 300);
+            }
           }
         }
+      } catch (error) {
+        console.error('Error in key handler:', error);
+        window.showToast('Input error');
       }
     });
   });
   
-  // Add click handler to unlock button
-  if (unlockButton) {
-    unlockButton.addEventListener('click', validatePasscode);
-  }
-  
-  // Function to update dots based on passcode length
+  // Detailed function definitions with error handling
   function updateDots() {
-    dots.forEach((dot, index) => {
-      if (index < window.passcodeEntered.length) {
-        dot.classList.add('filled');
-        // Add pulse animation
-        dot.classList.add('pulse');
-        setTimeout(() => {
-          dot.classList.remove('pulse');
-        }, 300);
-      } else {
-        dot.classList.remove('filled');
-      }
-    });
-  }
-  
-  // Function to validate passcode
-  function validatePasscode() {
-    if (window.passcodeEntered === window.correctPasscode) {
-      // Correct passcode
-      unlockWallet();
-    } else if (window.passcodeEntered.length === 6) {
-      // Incorrect passcode - show error, clear and reset
-      const dotsContainer = document.querySelector('.passcode-dots');
-      dotsContainer.classList.add('shake');
-      
-      setTimeout(() => {
-        window.passcodeEntered = '';
-        updateDots();
-        dotsContainer.classList.remove('shake');
-      }, 500);
-
-      // Show error toast
-      window.showToast('Invalid passcode. Try again.', 1500);
+    try {
+      dots.forEach((dot, index) => {
+        if (index < window.passcodeEntered.length) {
+          dot.classList.add('filled');
+          dot.classList.add('pulse');
+          setTimeout(() => {
+            dot.classList.remove('pulse');
+          }, 300);
+        } else {
+          dot.classList.remove('filled');
+        }
+      });
+    } catch (error) {
+      console.error('Dot update error:', error);
     }
   }
   
-  // Function to unlock wallet and show main screen
+  function validatePasscode() {
+    try {
+      if (window.passcodeEntered === window.correctPasscode) {
+        unlockWallet();
+      } else if (window.passcodeEntered.length === 6) {
+        const dotsContainer = document.querySelector('.passcode-dots');
+        dotsContainer.classList.add('shake');
+        
+        setTimeout(() => {
+          window.passcodeEntered = '';
+          updateDots();
+          dotsContainer.classList.remove('shake');
+        }, 500);
+
+        window.showToast('Invalid passcode. Try again.', 1500);
+      }
+    } catch (error) {
+      console.error('Passcode validation error:', error);
+      window.showToast('Validation failed');
+    }
+  }
+  
   function unlockWallet() {
-    const lockScreen = document.getElementById('lock-screen');
-    const walletScreen = document.getElementById('wallet-screen');
-    
-    if (lockScreen && walletScreen) {
-      lockScreen.classList.add('hidden');
-      walletScreen.classList.remove('hidden');
+    try {
+      const lockScreen = document.getElementById('lock-screen');
+      const walletScreen = document.getElementById('wallet-screen');
       
-      // Set up wallet data
-      if (typeof window.setupDemoBalance === 'function') {
-        window.setupDemoBalance();
+      if (lockScreen && walletScreen) {
+        lockScreen.classList.add('hidden');
+        walletScreen.classList.remove('hidden');
+        
+        if (typeof window.setupDemoBalance === 'function') {
+          window.setupDemoBalance();
+        }
+        
+        if (typeof window.populateMainWalletTokenList === 'function') {
+          window.populateMainWalletTokenList();
+        }
       }
-      
-      // Call any other initialization functions needed
-      if (typeof window.populateMainWalletTokenList === 'function') {
-        window.populateMainWalletTokenList();
-      }
+    } catch (error) {
+      console.error('Unlock wallet error:', error);
+      window.showToast('Unlock failed');
     }
   }
 }
