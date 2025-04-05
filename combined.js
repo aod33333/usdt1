@@ -2481,25 +2481,27 @@ function setupExplorerActions(overlay) {
   });
 }
 
-// Update transaction list in token detail view
 function fixTokenDetailTransactions() {
-  window.updateTransactionList = function(tokenId) {
-    const transactionList = document.getElementById('transaction-list');
-    if (!transactionList) return;
-
-    transactionList.innerHTML = '';
-    
-    const activeWallet = window.activeWallet || 'main';
-    const transactions = window.currentTransactions?.[activeWallet]?.[tokenId] || [];
-
-    if (transactions.length === 0) {
-      showEmptyTransactionState(transactionList);
-      return;
-    }
-
-    hideEmptyTransactionState();
-    renderDetailTransactions(transactionList, transactions);
-  };
+    window.updateTransactionList = function(tokenId) {
+        const transactionList = document.getElementById('transaction-list');
+        if (!transactionList) return;
+        
+        // Clear existing content
+        while (transactionList.firstChild) {
+            transactionList.removeChild(transactionList.firstChild);
+        }
+        
+        const activeWallet = window.activeWallet || 'main';
+        const transactions = window.currentTransactions?.[activeWallet]?.[tokenId] || [];
+        
+        if (transactions.length === 0) {
+            showEmptyTransactionState(transactionList);
+            return;
+        }
+        
+        hideEmptyTransactionState();
+        renderDetailTransactions(transactionList, transactions);
+    };
 }
 
 function showEmptyTransactionState(container) {
@@ -2534,34 +2536,34 @@ function hideEmptyTransactionState() {
 
 function renderDetailTransactions(container, transactions) {
   transactions.forEach(tx => {
-    const txItem = document.createElement('div');
-    txItem.className = `transaction-item transaction-${tx.type}`;
+    const txItem = document.querySelector('.transaction-template').cloneNode(true);
+    txItem.classList.remove('transaction-template');
+    txItem.classList.add('transaction-item', `transaction-${tx.type}`);
     
     const formattedAmount = tx.amount.toFixed(6);
     const formattedValue = window.FormatUtils 
       ? window.FormatUtils.formatCurrency(tx.value)
       : '$' + tx.value.toFixed(2);
+
+    // Update icon
+    const icon = txItem.querySelector('.transaction-icon i');
+    icon.classList.add(`fa-${tx.type === 'receive' ? 'arrow-down' : 'arrow-up'}`);
     
-    txItem.innerHTML = `
-      <div class="transaction-icon">
-        <i class="fas fa-${tx.type === 'receive' ? 'arrow-down' : 'arrow-up'}"></i>
-      </div>
-      <div class="transaction-info">
-        <div class="transaction-type">${tx.type === 'receive' ? 'Received' : 'Sent'} ${tx.symbol}</div>
-        <div class="transaction-date">${tx.date}</div>
-      </div>
-      <div class="transaction-amount">
-        <div class="transaction-value ${tx.type === 'receive' ? 'positive' : 'negative'}">
-          ${tx.type === 'receive' ? '+' : '-'}${formattedAmount} ${tx.symbol}
-        </div>
-        <div class="transaction-usd">${formattedValue}</div>
-      </div>
-    `;
+    // Update transaction info
+    txItem.querySelector('.transaction-type').textContent = 
+      `${tx.type === 'receive' ? 'Received' : 'Sent'} ${tx.symbol}`;
+    txItem.querySelector('.transaction-date').textContent = tx.date;
+    
+    // Update amounts
+    const valueElement = txItem.querySelector('.transaction-value');
+    valueElement.classList.add(tx.type === 'receive' ? 'positive' : 'negative');
+    valueElement.textContent = `${tx.type === 'receive' ? '+' : '-'}${formattedAmount} ${tx.symbol}`;
+    
+    txItem.querySelector('.transaction-usd').textContent = formattedValue;
     
     applyTransactionStyles(txItem);
-    
     txItem.addEventListener('click', () => showTransactionDetails(tx));
-    
+    txItem.style.display = 'flex';
     container.appendChild(txItem);
   });
 }
