@@ -4911,159 +4911,60 @@ setupTokenDetailActions: function(tokenId) {
   }
 }
   
-window.TrustWallet = window.TrustWallet || {};
+if (!window.TrustWallet) {
+    window.TrustWallet = {};
+}
 
 window.TrustWallet.showSendScreen = function(tokenId) {
-    // Initialize flags and status
-    let isValidToken = false;
-    let hasRequiredFields = true;
-    let displayUpdateStatus = {
-        tokenInfo: false,
-        chainInfo: false,
-        amountFields: false
-    };
-
-    // Validate and get token ID if not provided
     if (!tokenId) {
         const activeWallet = window.activeWallet || 'main';
         const wallet = window.currentWalletData?.[activeWallet];
         if (wallet && wallet.tokens.length > 0) {
             tokenId = wallet.tokens[0].id;
-            console.debug('[TrustWallet] Using default token:', tokenId);
         } else {
-            console.warn('[TrustWallet] No tokens available for sending');
             window.showToast('No tokens available to send');
             return false;
         }
     }
     
-    // Get token data and validate
     const token = this.getToken(tokenId);
-    if (!token) {
-        console.error('[TrustWallet] Invalid token ID:', tokenId);
-        return false;
-    }
-    isValidToken = true;
+    if (!token) return false;
     
-    // Store active token for reference
     window.activeSendTokenId = tokenId;
-    console.debug('[TrustWallet] Active send token set:', tokenId);
     
-    // Update token display information
-    try {
-        const elements = {
-            tokenSymbol: document.getElementById('send-token-symbol'),
-            tokenName: document.getElementById('send-token-name'),
-            tokenNetwork: document.getElementById('send-token-network'),
-            tokenIcon: document.querySelector('#send-screen .token-icon img'),
-            chainBadge: document.querySelector('#send-screen .chain-badge img')
-        };
-
-        // Validate required elements exist
-        Object.entries(elements).forEach(([key, element]) => {
-            if (!element) {
-                console.warn(`[TrustWallet] Missing element: ${key}`);
-                hasRequiredFields = false;
-            }
-        });
-
-        if (!hasRequiredFields) {
-            console.error('[TrustWallet] Missing required UI elements');
-            return false;
-        }
-
-        // Update token information display
-        if (elements.tokenSymbol) {
-            elements.tokenSymbol.textContent = token.symbol;
-            displayUpdateStatus.tokenInfo = true;
-        }
-        
-        if (elements.tokenName) {
-            elements.tokenName.textContent = token.name;
-            displayUpdateStatus.tokenInfo = true;
-        }
-        
-        if (elements.tokenNetwork) {
-            elements.tokenNetwork.textContent = token.network;
-            displayUpdateStatus.tokenInfo = true;
-        }
-        
-        if (elements.tokenIcon) {
-            elements.tokenIcon.src = token.icon;
-            elements.tokenIcon.onerror = function() {
-                console.warn('[TrustWallet] Failed to load token icon');
-                this.src = 'assets/default-token-icon.png';
-            };
-            displayUpdateStatus.tokenInfo = true;
-        }
-
-        // Handle chain badge display
-        if (elements.chainBadge) {
-            if (token.chainBadge) {
-                elements.chainBadge.src = token.chainBadge;
-                elements.chainBadge.parentElement.style.display = 'block';
-                elements.chainBadge.onerror = function() {
-                    console.warn('[TrustWallet] Failed to load chain badge');
-                    this.parentElement.style.display = 'none';
-                };
-            } else {
-                elements.chainBadge.parentElement.style.display = 'none';
-            }
-            displayUpdateStatus.chainInfo = true;
-        }
-        
-        // Update maximum amount display
-        const maxAmount = document.getElementById('max-amount');
-        if (maxAmount) {
-            maxAmount.textContent = token.amount.toFixed(6);
-            displayUpdateStatus.amountFields = true;
-        }
-        
-        // Reset input fields
-        const amountInput = document.getElementById('send-amount');
-        const addressInput = document.getElementById('recipient-address');
-        
-        if (amountInput) {
-            amountInput.value = '';
-            amountInput.setAttribute('max', token.amount);
-            amountInput.setAttribute('data-token-decimals', token.decimals || 18);
-            displayUpdateStatus.amountFields = true;
-        }
-        
-        if (addressInput) {
-            addressInput.value = '';
-            addressInput.setAttribute('data-chain-id', token.chainId);
-            displayUpdateStatus.amountFields = true;
-        }
-        
-        // Reset dollar value display
-        updateDollarValue('');
-        
-        // Log display update status
-        console.debug('[TrustWallet] Display update status:', displayUpdateStatus);
-        
-        // Navigate to send screen
-        window.navigateTo('send-screen');
-        
-        // Return success if all updates completed
-        return (
-            isValidToken &&
-            hasRequiredFields &&
-            displayUpdateStatus.tokenInfo &&
-            displayUpdateStatus.chainInfo &&
-            displayUpdateStatus.amountFields
-        );
-        
-    } catch (error) {
-        console.error('[TrustWallet] Error in showSendScreen:', error);
-        window.showToast('Failed to load send screen');
-        return false;
+    const tokenSymbol = document.getElementById('send-token-symbol');
+    const tokenName = document.getElementById('send-token-name');
+    const tokenNetwork = document.getElementById('send-token-network');
+    const tokenIcon = document.querySelector('#send-screen .token-icon img');
+    const chainBadge = document.querySelector('#send-screen .chain-badge img');
+    
+    if (tokenSymbol) tokenSymbol.textContent = token.symbol;
+    if (tokenName) tokenName.textContent = token.name;
+    if (tokenNetwork) tokenNetwork.textContent = token.network;
+    if (tokenIcon) tokenIcon.src = token.icon;
+    
+    if (chainBadge && token.chainBadge) {
+        chainBadge.src = token.chainBadge;
+        chainBadge.parentElement.style.display = 'block';
+    } else if (chainBadge) {
+        chainBadge.parentElement.style.display = 'none';
     }
-};
-
-// Export to window scope with proper binding
-window.showSendScreen = function(tokenId) {
-    return window.TrustWallet.showSendScreen.call(window.TrustWallet, tokenId);
+    
+    const maxAmount = document.getElementById('max-amount');
+    if (maxAmount) {
+        maxAmount.textContent = token.amount.toFixed(6);
+    }
+    
+    const amountInput = document.getElementById('send-amount');
+    const addressInput = document.getElementById('recipient-address');
+    
+    if (amountInput) amountInput.value = '';
+    if (addressInput) addressInput.value = '';
+    
+    updateDollarValue('');
+    
+    window.navigateTo('send-screen');
+    return true;
 };
   
   showReceiveScreen: function(tokenId) {
