@@ -3,19 +3,21 @@
 // Author: aod33333
 
 (function() {
+  'use strict';
+  
   // Configuration constants
   const CONFIG = {
-    debug: false,                // Enable/disable debug logging
-    initDelay: 300,             // Delay before starting initialization (ms)
-    screenLoadDelay: 300,       // Delay after loading screens (ms)
-    useAnimations: true,        // Use smooth animations for transitions
-    badgeRemovalInterval: 500,  // Interval to remove unwanted badges (ms)
-    autoApplyFixes: true,       // Automatically re-apply fixes when screens change
-    finalCleanupDelay: 800,     // Delay for final cleanup checks (ms)
-    version: '3.1.0',           // Combined version number
-    lastUpdate: '2025-04-05'    // Last update date
+    debug: false,
+    initDelay: 300,
+    screenLoadDelay: 300,
+    useAnimations: true,
+    badgeRemovalInterval: 500,
+    autoApplyFixes: true,
+    finalCleanupDelay: 800,
+    version: '3.1.0',
+    lastUpdate: '2025-04-05'
   };
-
+  
   // Enhanced logging system
   function log(message, type = 'info') {
     if (CONFIG.debug || type === 'error') {
@@ -25,23 +27,17 @@
     }
   }
 
-  // Main initialization function with enhanced error handling
-  function initFixes() {
-    try {
-      log('Initializing Trust Wallet UI comprehensive patch v3.1.0...');
-      
-      // Initialize core components
-      initializeCore();
-      
-      // Expose global API
-      exposeGlobalAPI();
-      
-      log('Trust Wallet comprehensive patch initialized successfully');
-    } catch (error) {
-      log(`Initialization failed: ${error.message}`, 'error');
-      throw error;
-    }
+  // Initialize core app
+  function initFixes() {...}
+
+  // Start initialization
+  try {
+    log(`Trust Wallet UI Patch v${CONFIG.version} loading...`);
+    initFixes();
+  } catch (error) {
+    log(`Critical initialization error: ${error.message}`, 'error');
   }
+})();
 
   // Core initialization
   function initializeCore() {
@@ -106,12 +102,15 @@
 // Last updated: 2025-04-05 20:20:45 UTC
 // Author: aod33333 & Claude
 
-function setupDefaultWalletData() {
+// Current Date and Time (UTC - YYYY-MM-DD HH:MM:SS formatted): 2025-04-06 02:31:38
+// Current User's Login: aod33333
+
+const setupDefaultWalletData = () => {
   return new Promise(resolve => {
     log('Setting up default wallet data');
     
     // Deep clone function
-    function deepClone(obj) {
+    const deepClone = (obj) => {
       if (obj === null || typeof obj !== 'object') {
         return obj;
       }
@@ -128,7 +127,7 @@ function setupDefaultWalletData() {
       }
 
       return clonedObj;
-    }
+    };
     
     // Initialize default wallet data if not present
     if (!window.walletData) {
@@ -367,7 +366,7 @@ function setupDefaultWalletData() {
     
     resolve();
   });
-}
+};
 
 // Token list population function
 function populateMainWalletTokenList() {
