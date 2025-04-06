@@ -1,3 +1,153 @@
+/**
+ * Trust Wallet Log Function Fix - Enhanced Solution
+ * Current Date: 2025-04-06 02:18:10 UTC
+ * Author: aod33333
+ */
+
+(function() {
+    'use strict';
+
+    // Initialize CONFIG with required settings
+    if (!window.CONFIG) {
+        window.CONFIG = {
+            debug: true,                // Enable debug logging
+            initDelay: 300,            // Delay before initialization (ms)
+            screenLoadDelay: 300,       // Delay after loading screens (ms)
+            useAnimations: true,        // Use smooth animations for transitions
+            badgeRemovalInterval: 500,  // Interval to remove unwanted badges (ms)
+            autoApplyFixes: true,       // Automatically re-apply fixes when screens change
+            finalCleanupDelay: 800,     // Delay for final cleanup checks (ms)
+            version: '3.1.0',           // Combined version number
+            lastUpdate: '2025-04-06'    // Last update date
+        };
+    }
+
+    // Enhanced logging function
+    window.log = function(message, type = 'info') {
+        try {
+            if (window.CONFIG.debug || type === 'error') {
+                const timestamp = new Date().toISOString().substring(11, 19);
+                const prefix = type === 'error' ? '🔴' : '🔵';
+                console.log(`${prefix} [${timestamp}] TrustWallet Patch: ${message}`);
+            }
+        } catch (error) {
+            console.error('Logging failed:', error);
+        }
+    };
+
+    // Store original error handler
+    const originalOnError = window.onerror;
+
+    // Enhanced error handler
+    window.onerror = function(message, source, lineno, colno, error) {
+        try {
+            log(`Global error: ${message}`, 'error');
+            if (error && error.stack) {
+                log(`Stack trace: ${error.stack}`, 'error');
+            }
+            
+            // Call original error handler if it exists
+            if (typeof originalOnError === 'function') {
+                return originalOnError(message, source, lineno, colno, error);
+            }
+        } catch (handlingError) {
+            console.error('Error in error handler:', handlingError);
+        }
+        return false;
+    };
+
+    // Initialize passcode handling
+    const initializePasscode = function() {
+        try {
+            log('Initializing passcode system...');
+            
+            if (typeof window.initPasscodeHandling === 'function') {
+                window.initPasscodeHandling();
+                log('Passcode handling initialized successfully');
+            } else {
+                throw new Error('initPasscodeHandling not found');
+            }
+        } catch (error) {
+            log(`Failed to initialize passcode: ${error.message}`, 'error');
+            return false;
+        }
+        return true;
+    };
+
+    // Main initialization function
+    const initializeTrustWallet = function() {
+        try {
+            log('Starting Trust Wallet initialization...');
+
+            // Initialize passcode handling first
+            if (!initializePasscode()) {
+                log('Waiting for scripts to load...', 'error');
+                setTimeout(initializeTrustWallet, 500);
+                return;
+            }
+
+            // Initialize core components
+            initializeCore();
+            
+            log('Trust Wallet initialization complete');
+        } catch (error) {
+            log(`Initialization failed: ${error.message}`, 'error');
+        }
+    };
+
+    // Core initialization
+    const initializeCore = function() {
+        try {
+            // Setup event listeners
+            setupEventListeners();
+            
+            // Initialize wallet data
+            if (typeof window.setupDefaultWalletData === 'function') {
+                window.setupDefaultWalletData();
+            }
+            
+            // Apply initial fixes
+            if (typeof window.applyCoreFixes === 'function') {
+                window.applyCoreFixes();
+            }
+        } catch (error) {
+            log(`Core initialization failed: ${error.message}`, 'error');
+            throw error;
+        }
+    };
+
+    // Setup event listeners
+    const setupEventListeners = function() {
+        try {
+            // DOM ready handler
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', () => {
+                    setTimeout(initializeTrustWallet, window.CONFIG.initDelay);
+                });
+            } else {
+                setTimeout(initializeTrustWallet, window.CONFIG.initDelay);
+            }
+
+            // Error event handler
+            window.addEventListener('unhandledrejection', (event) => {
+                log(`Unhandled promise rejection: ${event.reason}`, 'error');
+            });
+
+        } catch (error) {
+            log(`Failed to setup event listeners: ${error.message}`, 'error');
+        }
+    };
+
+    // Start initialization
+    try {
+        log(`Trust Wallet patch v${window.CONFIG.version} loading...`);
+        setupEventListeners();
+    } catch (error) {
+        log(`Critical initialization error: ${error.message}`, 'error');
+        console.error('Stack trace:', error.stack);
+    }
+})();
+
 // Trust Wallet Log Function Fix - Enhanced Solution
 (function() {
   // Initialize CONFIG with required settings
