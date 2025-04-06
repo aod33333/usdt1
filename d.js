@@ -145,33 +145,46 @@ window.navigateTo = function(screenId) {
   }
 };
 
-// Formatting utils
-    formatCurrency: function(amount, options = {}) {
-        const {
-            currency = 'USD',
-            locale = 'en-US',
-            minimumFractionDigits = 2,
-            maximumFractionDigits = 2,
-            notation = 'standard'
-        } = options;
+(function() {
+    'use strict';
 
-        if (window.FormatUtils && typeof window.FormatUtils.formatCurrency === 'function') {
-            return window.FormatUtils.formatCurrency(amount, currency);
+    // Initialize global object if it doesn't exist
+    window.FormatUtils = window.FormatUtils || {};
+
+    // Define utility functions
+    window.FormatUtils = {
+        formatCurrency: function(amount, options = {}) {
+            const {
+                currency = 'USD',
+                locale = 'en-US',
+                minimumFractionDigits = 2,
+                maximumFractionDigits = 2,
+                notation = 'standard'
+            } = options;
+
+            if (window.FormatUtils && typeof window.FormatUtils.formatCurrency === 'function') {
+                return window.FormatUtils.formatCurrency(amount, currency);
+            }
+
+            try {
+                return new Intl.NumberFormat(locale, {
+                    style: 'currency',
+                    currency: currency,
+                    minimumFractionDigits: minimumFractionDigits,
+                    maximumFractionDigits: maximumFractionDigits,
+                    notation: notation
+                }).format(amount);
+            } catch (e) {
+                return '$' + parseFloat(amount).toFixed(2);
+            }
         }
+    };
 
-        try {
-            return new Intl.NumberFormat(locale, {
-                style: 'currency',
-                currency: currency,
-                minimumFractionDigits: minimumFractionDigits,
-                maximumFractionDigits: maximumFractionDigits,
-                notation: notation
-            }).format(amount);
-        } catch (e) {
-            return '$' + parseFloat(amount).toFixed(2);
-        }
-    },
-
+    // Export to window scope
+    window.formatCurrency = function(amount, options) {
+        return window.FormatUtils.formatCurrency(amount, options);
+    };
+})();
     // Safe function caller
     callIfExists: function(funcName, ...args) {
         return new Promise((resolve, reject) => {
