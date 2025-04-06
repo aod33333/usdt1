@@ -117,7 +117,7 @@ window.screenTransitionHandler = function(screenId) {
     }
   } else {
     // Fallback styling if combined.js isn't loaded yet
-    applyScreenStyling(screenId);
+    window.applyScreenStyling(screenId);
   }
 };
 
@@ -159,6 +159,32 @@ window.callIfExists = function(funcName, ...args) {
     return window[funcName](...args);
   }
   return null;
+};
+
+// Basic screen styling function for fallback
+window.applyScreenStyling = function(screenId) {
+    const screen = document.getElementById(screenId);
+    if (!screen) return;
+    
+    // Hide all screens first
+    document.querySelectorAll('.screen').forEach(s => {
+        s.classList.add('hidden');
+    });
+    
+    // Show target screen
+    screen.classList.remove('hidden');
+    
+    // Apply basic styling based on screen type
+    switch(screenId) {
+        case 'wallet-screen':
+            screen.style.backgroundColor = '#ffffff';
+            break;
+        case 'send-screen':
+        case 'receive-screen':
+        case 'history-screen':
+            screen.classList.add('with-status-bar');
+            break;
+    }
 };
 
   // Initialize passcode handling
