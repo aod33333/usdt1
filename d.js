@@ -7,6 +7,134 @@
     version: '3.1.0'            // Version number
   };
 
+  // In d.js, add this fix at the very top after CONFIG initialization:
+
+// Critical fix for token initialization
+(function() {
+    const originalSetupDefaultWalletData = window.setupDefaultWalletData;
+    
+    window.setupDefaultWalletData = async function() {
+        // Call original setup
+        await originalSetupDefaultWalletData();
+        
+        // Force token population and UI update
+        const tokenList = document.getElementById('token-list');
+        if (!tokenList) return;
+
+        // Clear existing content
+        tokenList.innerHTML = '';
+
+        // Get current wallet tokens
+        const activeWallet = window.activeWallet || 'main';
+        const wallet = window.currentWalletData?.[activeWallet];
+        
+        if (!wallet?.tokens?.length) return;
+        
+        // Create and append token elements
+        wallet.tokens.forEach(token => {
+            const tokenItem = document.createElement('div');
+            tokenItem.className = 'token-item';
+            tokenItem.setAttribute('data-token-id', token.id);
+            
+            // Handle chain badge visibility
+            const chainBadgeHtml = token.chainBadge ? 
+                `<div class="chain-badge"><img src="${token.chainBadge}" alt="${token.network}"></div>` : '';
+            
+            // Format values
+            const formattedAmount = token.amount.toLocaleString(undefined, {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 6
+            });
+            
+            const formattedValue = new Intl.NumberFormat('en-US', {
+                style: 'currency',
+                currency: 'USD'
+            }).format(token.value);
+
+            tokenItem.innerHTML = `
+                <div class="token-icon">
+                    <img src="${token.icon}" alt="${token.name}">
+                    ${chainBadgeHtml}
+                </div>
+                <div class="token-info">
+                    <div class="token-name">${token.symbol}</div>
+                    <div class="token-price">
+                        ${token.name}
+                        <span class="token-price-change ${token.change >= 0 ? 'positive' : 'negative'}">
+                            ${token.change >= 0 ? '+' : ''}${token.change}%
+                        </span>
+                    </div>
+                </div>
+                <div class="token-amount">
+                    <div class="token-balance">${formattedAmount} ${token.symbol}</div>
+                    <div class="token-value">${formattedValue}</div>
+                </div>
+            `;
+
+            // Add click handler
+            tokenItem.addEventListener('click', function() {
+                if (typeof window.showTokenDetail === 'function') {
+                    window.showTokenDetail(token.id);
+                }
+            });
+
+            tokenList.appendChild(tokenItem);
+        });
+
+        // Update total balance display
+        updateBalanceDisplay();
+    };
+
+    // Fix critical screen transition issues
+    window.navigateTo = function(screenId) {
+        if (!screenId) return;
+        
+        const screens = document.querySelectorAll('.screen');
+        screens.forEach(screen => {
+            screen.classList.add('hidden');
+        });
+
+        const targetScreen = document.getElementById(screenId);
+        if (!targetScreen) return;
+
+        targetScreen.classList.remove('hidden');
+
+        // Handle screen-specific initialization
+        switch(screenId) {
+            case 'wallet-screen':
+                window.setupDefaultWalletData();
+                break;
+            case 'token-detail':
+                const token = window.currentTokenId;
+                if (token && typeof window.showTokenDetail === 'function') {
+                    window.showTokenDetail(token);
+                }
+                break;
+            case 'send-screen':
+            case 'receive-screen':
+                const symbol = document.querySelector('#detail-symbol')?.textContent;
+                if (symbol) {
+                    const tokenId = symbol.toLowerCase();
+                    if (screenId === 'send-screen' && typeof window.showSendScreen === 'function') {
+                        window.showSendScreen(tokenId);
+                    } else if (screenId === 'receive-screen' && typeof window.showReceiveScreen === 'function') {
+                        window.showReceiveScreen(tokenId);
+                    }
+                }
+                break;
+        }
+    };
+
+    // Enhanced error recovery
+    window.addEventListener('error', function(event) {
+        console.error('Error caught:', event.error);
+        // Try to recover wallet state
+        if (!window.currentWalletData || !window.walletData) {
+            window.setupDefaultWalletData();
+        }
+    });
+})();
+
   // Define logging function
   window.log = function(message, type = 'info') {
     const CONFIG = window.CONFIG || {debug: true};
