@@ -4911,63 +4911,81 @@ setupTokenDetailActions: function(tokenId) {
   }
 }
   
-  showSendScreen: function(tokenId) {
+// Add to window.TrustWallet object
+showSendScreen: function(tokenId) {
+    // Handle no token ID case
     if (!tokenId) {
-      const activeWallet = window.activeWallet || 'main';
-      const wallet = window.currentWalletData?.[activeWallet];
-      if (wallet && wallet.tokens.length > 0) {
-        tokenId = wallet.tokens[0].id;
-      } else {
-        window.showToast('No tokens available to send');
-        return false;
-      }
+        const activeWallet = window.activeWallet || 'main';
+        const wallet = window.currentWalletData?.[activeWallet];
+        if (wallet && wallet.tokens.length > 0) {
+            tokenId = wallet.tokens[0].id;
+        } else {
+            window.showToast('No tokens available to send');
+            return false;
+        }
     }
-    
-    const token = this.getToken(tokenId);
+
+    // Get token data
+    const activeWallet = window.activeWallet || 'main';
+    const wallet = window.currentWalletData?.[activeWallet];
+    if (!wallet) return false;
+
+    const token = wallet.tokens.find(t => t.id === tokenId);
     if (!token) return false;
-    
+
     // Store active send token
     window.activeSendTokenId = tokenId;
-    
-    // Update send screen UI with token details
-    const tokenSymbol = document.getElementById('send-token-symbol');
-    const tokenName = document.getElementById('send-token-name');
-    const tokenNetwork = document.getElementById('send-token-network');
-    const tokenIcon = document.querySelector('#send-screen .token-icon img');
-    const chainBadge = document.querySelector('#send-screen .chain-badge img');
-    
-    if (tokenSymbol) tokenSymbol.textContent = token.symbol;
-    if (tokenName) tokenName.textContent = token.name;
-    if (tokenNetwork) tokenNetwork.textContent = token.network;
-    if (tokenIcon) tokenIcon.src = token.icon;
-    
-    if (chainBadge && token.chainBadge) {
-      chainBadge.src = token.chainBadge;
-      chainBadge.parentElement.style.display = 'block';
-    } else if (chainBadge) {
-      chainBadge.parentElement.style.display = 'none';
+
+    // Update send screen UI elements
+    const elements = {
+        symbol: document.getElementById('send-token-symbol'),
+        name: document.getElementById('send-token-name'),
+        network: document.getElementById('send-token-network'),
+        icon: document.querySelector('#send-screen .token-icon img'),
+        chainBadge: document.querySelector('#send-screen .chain-badge img')
+    };
+
+    // Update UI elements if they exist
+    if (elements.symbol) elements.symbol.textContent = token.symbol;
+    if (elements.name) elements.name.textContent = token.name;
+    if (elements.network) elements.network.textContent = token.network;
+    if (elements.icon) elements.icon.src = token.icon;
+
+    // Handle chain badge
+    if (elements.chainBadge) {
+        if (token.chainBadge) {
+            elements.chainBadge.src = token.chainBadge;
+            elements.chainBadge.parentElement.style.display = 'block';
+        } else {
+            elements.chainBadge.parentElement.style.display = 'none';
+        }
     }
-    
+
     // Update available balance
     const maxAmount = document.getElementById('max-amount');
-    if (maxAmount) {
-      maxAmount.textContent = token.amount.toFixed(6);
-    }
-    
-    // Reset input
+    if (maxAmount) maxAmount.textContent = token.amount.toFixed(6);
+
+    // Reset input fields
     const amountInput = document.getElementById('send-amount');
     const addressInput = document.getElementById('recipient-address');
-    
     if (amountInput) amountInput.value = '';
     if (addressInput) addressInput.value = '';
-    
-    // Update dollar value
-    updateDollarValue('');
-    
+
+    // Reset dollar value display
+    const dollarValue = document.getElementById('dollar-value');
+    if (dollarValue) dollarValue.textContent = '≈ $0.00';
+
     // Navigate to send screen
-    window.navigateTo('send-screen');
-    return true;
-  },
+    return window.navigateTo('send-screen');
+},
+
+// Then add this after the TrustWallet object definition:
+window.showSendScreen = function(tokenId) {
+    if (window.TrustWallet && typeof window.TrustWallet.showSendScreen === 'function') {
+        return window.TrustWallet.showSendScreen.call(window.TrustWallet, tokenId);
+    }
+    return false;
+};
   
   showReceiveScreen: function(tokenId) {
     if (!tokenId) {
