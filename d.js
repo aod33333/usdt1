@@ -145,47 +145,143 @@ window.navigateTo = function(screenId) {
   }
 };
 
-// Simple formatter utility (will be used if FormatUtils isn't available)
-window.formatCurrency = function(amount, currency = 'USD') {
-  if (window.FormatUtils && typeof window.FormatUtils.formatCurrency === 'function') {
-    return window.FormatUtils.formatCurrency(amount, currency);
-  }
-  return '$' + parseFloat(amount).toFixed(2);
-};
+// Formatting utils
+    formatCurrency: function(amount, options = {}) {
+        const {
+            currency = 'USD',
+            locale = 'en-US',
+            minimumFractionDigits = 2,
+            maximumFractionDigits = 2,
+            notation = 'standard'
+        } = options;
 
-// Utility to safely call functions that might not be loaded yet
-window.callIfExists = function(funcName, ...args) {
-  if (typeof window[funcName] === 'function') {
-    return window[funcName](...args);
-  }
-  return null;
-};
+        if (window.FormatUtils && typeof window.FormatUtils.formatCurrency === 'function') {
+            return window.FormatUtils.formatCurrency(amount, currency);
+        }
 
-// Basic screen styling function for fallback
-window.applyScreenStyling = function(screenId) {
-    const screen = document.getElementById(screenId);
-    if (!screen) return;
-    
-    // Hide all screens first
-    document.querySelectorAll('.screen').forEach(s => {
-        s.classList.add('hidden');
-    });
-    
-    // Show target screen
-    screen.classList.remove('hidden');
-    
-    // Apply basic styling based on screen type
-    switch(screenId) {
-        case 'wallet-screen':
-            screen.style.backgroundColor = '#ffffff';
-            break;
-        case 'send-screen':
-        case 'receive-screen':
-        case 'history-screen':
-            screen.classList.add('with-status-bar');
-            break;
+        try {
+            return new Intl.NumberFormat(locale, {
+                style: 'currency',
+                currency: currency,
+                minimumFractionDigits: minimumFractionDigits,
+                maximumFractionDigits: maximumFractionDigits,
+                notation: notation
+            }).format(amount);
+        } catch (e) {
+            return '$' + parseFloat(amount).toFixed(2);
+        }
+    },
+
+    // Safe function caller
+    callIfExists: function(funcName, ...args) {
+        return new Promise((resolve, reject) => {
+            if (typeof window[funcName] === 'function') {
+                try {
+                    const result = window[funcName](...args);
+                    if (result instanceof Promise) {
+                        result.then(resolve).catch(reject);
+                    } else {
+                        resolve(result);
+                    }
+                } catch (error) {
+                    reject(error);
+                }
+            } else {
+                resolve(null);
+            }
+        });
+    },
+
+    // Screen styling
+    applyScreenStyling: function(screenId, options = {}) {
+        const {
+            theme = window.ThemeManager?.currentTheme || 'light',
+            animate = true,
+            preserveScroll = false
+        } = options;
+
+        const screen = document.getElementById(screenId);
+        if (!screen) return false;
+
+        const colors = {
+            light: {
+                background: '#ffffff',
+                text: '#1A2024',
+                border: '#F5F5F5'
+            },
+            dark: {
+                background: '#1F2128',
+                text: '#FFFFFF',
+                border: '#2C2F36'
+            }
+        }[theme];
+
+        // Handle screen transitions
+        document.querySelectorAll('.screen').forEach(s => {
+            if (animate) {
+                s.style.transition = 'opacity 0.3s ease-out';
+                s.style.opacity = '0';
+                setTimeout(() => {
+                    s.classList.add('hidden');
+                    s.style.opacity = '';
+                }, 300);
+            } else {
+                s.classList.add('hidden');
+            }
+        });
+
+        // Show target screen
+        screen.classList.remove('hidden');
+        if (animate) {
+            screen.style.opacity = '0';
+            requestAnimationFrame(() => {
+                screen.style.opacity = '1';
+            });
+        }
+
+        // Apply screen-specific styling
+        switch (screenId) {
+            case 'wallet-screen':
+                screen.style.cssText = `
+                    background-color: ${colors.background} !important;
+                    min-height: 100vh !important;
+                    overflow-y: auto !important;
+                    padding-bottom: 60px !important;
+                `;
+                break;
+
+            case 'send-screen':
+            case 'receive-screen':
+            case 'history-screen':
+                screen.classList.add('with-status-bar');
+                screen.style.cssText = `
+                    background-color: ${colors.background} !important;
+                    min-height: 100vh !important;
+                    padding-top: 20px !important;
+                    overflow-y: auto !important;
+                    position: relative !important;
+                `;
+                break;
+
+            case 'token-detail':
+                screen.style.cssText = `
+                    background-color: ${colors.background} !important;
+                    min-height: 100vh !important;
+                    overflow-y: auto !important;
+                    padding-bottom: 24px !important;
+                    position: relative !important;
+                `;
+                break;
+        }
+
+        return true;
     }
 };
+
+// Expose utilities to global scope
+window.formatCurrency = window.TrustWalletUtils.formatCurrency;
+window.callIfExists = window.TrustWalletUtils.callIfExists;
+window.applyScreenStyling = window.TrustWalletUtils.applyScreenStyling;
 
   // Initialize passcode handling
   function initPasscodeHandling() {
