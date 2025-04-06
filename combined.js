@@ -780,6 +780,12 @@ function fixSendScreen() {
     return;
   }
 
+  // Ensure we're on the first page of the send screen (not a second page)
+  const sendContent = sendScreen.querySelector('.send-content');
+  if (sendContent) {
+    sendContent.style.display = 'block';
+  }
+
   // Fix token selection row
   const tokenSelectionRow = sendScreen.querySelector('.token-selection-row');
   if (tokenSelectionRow) {
@@ -815,10 +821,32 @@ function fixSendScreen() {
   // Add dollar value under amount
   addDollarValueUnderAmount(sendScreen);
   
-  // Setup event listeners
+  // Reset amount input field and recipient address
+  const amountInput = sendScreen.querySelector('#send-amount');
+  const recipientInput = sendScreen.querySelector('#recipient-address');
+  if (amountInput) amountInput.value = '';
+  if (recipientInput) recipientInput.value = '';
+  
+  // Update dollar value to reflect empty amount
+  const dollarValue = sendScreen.querySelector('#dollar-value');
+  if (dollarValue) dollarValue.textContent = '≈ $0.00';
+  
+  // Make sure send button is properly styled
+  const sendButton = sendScreen.querySelector('#send-button-confirm');
+  if (sendButton) {
+    sendButton.disabled = true;
+    sendButton.style.opacity = '0.6';
+  }
+  
+  // Remove any potential second pages or overlays
+  const tokenSelectScreen = document.getElementById('send-token-select');
+  if (tokenSelectScreen) {
+    tokenSelectScreen.classList.add('hidden');
+  }
+  
+  // Setup event listeners (only if not already set)
   setupSendScreenEvents(sendScreen);
 }
-
 // Create send screen if missing
 function createSendScreen() {
   const existingScreen = document.getElementById('send-screen');
@@ -2244,56 +2272,104 @@ function fixTransactionHistory() {
   if (!txList) return;
 
   // Create enhanced populateTransactionHistory function
-  window.populateTransactionHistory = function() {
-    txList.innerHTML = '';
+// Fix populateTransactionHistory function
+window.populateTransactionHistory = function() {
+  const txList = document.getElementById('history-transaction-list');
+  if (!txList) {
+    log('Transaction list element not found', 'error');
+    return;
+  }
+
+  // Clear existing content
+  txList.innerHTML = '';
+  
+  const activeWallet = window.activeWallet || 'main';
+  let allTransactions = [];
+  
+  // Get all transactions for all tokens in this wallet
+  const walletTransactions = window.currentTransactions?.[activeWallet] || {};
+  
+  Object.keys(walletTransactions).forEach(tokenId => {
+    const tokenTxs = walletTransactions[tokenId] || [];
+    const wallet = window.currentWalletData?.[activeWallet];
+    const token = wallet?.tokens.find(t => t.id === tokenId);
     
-    const activeWallet = window.activeWallet || 'main';
-    const walletTransactions = window.currentTransactions?.[activeWallet] || {};
-    let allTransactions = [];
-
-    // Flatten token transactions
-    Object.keys(walletTransactions).forEach(tokenId => {
-      const tokenTxs = walletTransactions[tokenId] || [];
-      const wallet = window.currentWalletData?.[activeWallet];
-      const token = wallet?.tokens.find(t => t.id === tokenId);
-
-      const txsWithTokenInfo = tokenTxs.map(tx => ({
+    tokenTxs.forEach(tx => {
+      allTransactions.push({
         ...tx,
-        tokenId,
+        tokenId: tokenId,
         tokenName: token?.name || tx.symbol,
         tokenIcon: token?.icon || `https://cryptologos.cc/logos/${tokenId}-${tokenId}-logo.png`
-      }));
-
-      allTransactions = allTransactions.concat(txsWithTokenInfo);
+      });
     });
-
-    // Sort by date (newest first)
-    allTransactions.sort((a, b) => {
-      const dateA = new Date(a.date.replace(' ', 'T'));
-      const dateB = new Date(b.date.replace(' ', 'T'));
-      return dateB - dateA;
-    });
-
-    if (allTransactions.length === 0) {
-      showEmptyState(txList);
-    } else {
-      renderTransactions(txList, allTransactions);
+  });
+  
+  // Sort by date (newest first)
+  allTransactions.sort((a, b) => {
+    const dateA = new Date(a.date.replace(' ', 'T'));
+    const dateB = new Date(b.date.replace(' ', 'T'));
+    return dateB - dateA;
+  });
+  
+  if (allTransactions.length === 0) {
+    // Show empty state
+    txList.innerHTML = `
+      <div class="no-transactions">
+        <p>No transaction history available</p>
+      </div>
+    `;
+    return;
+  }
+  
+  // Clone and use transaction template for each transaction
+  const template = document.querySelector('.transaction-template');
+  if (!template) {
+    console.error('Transaction template not found');
+    return;
+  }
+  
+  allTransactions.forEach(tx => {
+    const txItem = template.cloneNode(true);
+    txItem.classList.remove('hidden');
+    txItem.classList.remove('transaction-template');
+    txItem.classList.add('transaction-item');
+    txItem.classList.add(`transaction-${tx.type}`);
+    
+    // Fill in transaction details
+    const icon = txItem.querySelector('.transaction-icon i');
+    if (icon) {
+      icon.className = `fas fa-${tx.type === 'receive' ? 'arrow-down' : 'arrow-up'}`;
     }
-  };
-
-  // Initial population if history screen is visible
-  if (getComputedStyle(historyScreen).display !== 'none') {
-    window.populateTransactionHistory();
-  }
-
-  // Setup history button handler
-  const historyButton = document.querySelector('.quick-actions .action-circle:nth-child(5)');
-  if (historyButton) {
-    historyButton.addEventListener('click', () => {
-      setTimeout(window.populateTransactionHistory, 100);
+    
+    const txType = txItem.querySelector('.transaction-type');
+    if (txType) {
+      txType.textContent = `${tx.type === 'receive' ? 'Received' : 'Sent'} ${tx.symbol}`;
+    }
+    
+    const txDate = txItem.querySelector('.transaction-date');
+    if (txDate) {
+      txDate.textContent = tx.date;
+    }
+    
+    const txValue = txItem.querySelector('.transaction-value');
+    if (txValue) {
+      txValue.textContent = `${tx.type === 'receive' ? '+' : '-'}${tx.amount.toFixed(6)} ${tx.symbol}`;
+      txValue.className = `transaction-value ${tx.type === 'receive' ? 'positive' : 'negative'}`;
+    }
+    
+    const txUsd = txItem.querySelector('.transaction-usd');
+    if (txUsd) {
+      txUsd.textContent = formatCurrency(tx.value);
+    }
+    
+    // Add click handler
+    txItem.addEventListener('click', function() {
+      showTransactionDetails(tx);
     });
-  }
-}
+    
+    txList.appendChild(txItem);
+  });
+};
 
 function showEmptyState(container) {
   container.innerHTML = `
@@ -4245,8 +4321,12 @@ function setupGlobalErrorHandler() {
   });
 }
 
-// Fix navigation function to properly handle screen transitions
 window.navigateTo = function(screenId) {
+  // If TrustWallet is loaded, use its navigation
+  if (window.TrustWallet && typeof window.TrustWallet.navigateTo === 'function') {
+    return window.TrustWallet.navigateTo(screenId);
+  }
+  
   log(`Navigating to screen: ${screenId}`);
   
   // Hide all screens
@@ -4259,8 +4339,8 @@ window.navigateTo = function(screenId) {
   if (targetScreen) {
     targetScreen.classList.remove('hidden');
     
-    // Apply screen-specific fixes
-    applyScreenSpecificFixes(screenId);
+    // Use our handler to ensure all necessary fixes are applied
+    window.screenTransitionHandler(screenId);
     
     return true;
   } else {
@@ -4498,90 +4578,311 @@ window.TrustWallet = {
     return results;
   },
 
-  // Screen functions
-  showTokenDetail: function(tokenId) {
-    const token = this.getToken(tokenId);
-    if (!token) return false;
-    
-    // Update token detail view with this token
-    const detailSymbol = document.getElementById('detail-symbol');
-    const detailFullname = document.getElementById('detail-fullname');
-    const tokenIcon = document.querySelector('.token-detail-large-icon');
-    
-    if (detailSymbol) detailSymbol.textContent = token.symbol;
-    if (detailFullname) detailFullname.textContent = token.name;
-    if (tokenIcon) tokenIcon.src = token.icon;
-    
-    // Update balance info
-    const balanceAmount = document.querySelector('.token-detail-balance h2');
-    const balanceValue = document.querySelector('.token-detail-balance p');
-    
-    if (balanceAmount) {
-      balanceAmount.textContent = `${token.amount.toFixed(6)} ${token.symbol}`;
+// Screen functions
+showTokenDetail: function(tokenId) {
+  const token = this.getToken(tokenId);
+  if (!token) return false;
+  
+  // Store the current token ID globally for reference
+  window.currentDetailTokenId = tokenId;
+  
+  // Update token detail view with this token
+  const detailSymbol = document.getElementById('detail-symbol');
+  const detailFullname = document.getElementById('detail-fullname');
+  const tokenIcon = document.querySelector('.token-detail-large-icon');
+  
+  if (detailSymbol) detailSymbol.textContent = token.symbol;
+  if (detailFullname) detailFullname.textContent = token.name;
+  if (tokenIcon) tokenIcon.src = token.icon;
+  
+  // Update balance info
+  const balanceAmount = document.querySelector('.token-detail-balance h2');
+  const balanceValue = document.querySelector('.token-detail-balance p');
+  
+  if (balanceAmount) {
+    balanceAmount.textContent = `${token.amount.toFixed(6)} ${token.symbol}`;
+  }
+  
+  if (balanceValue) {
+    balanceValue.textContent = formatCurrency(token.value);
+  }
+  
+  // Update price info
+  const currentPrice = document.getElementById('token-current-price');
+  const priceChange = document.getElementById('token-price-change');
+  
+  if (currentPrice) {
+    currentPrice.textContent = formatCurrency(token.price);
+  }
+  
+  if (priceChange) {
+    priceChange.textContent = `${token.change >= 0 ? '+' : ''}${token.change}%`;
+    priceChange.className = token.change >= 0 ? 'positive' : 'negative';
+  }
+  
+  // Update network badge
+  if (typeof window.enhanceTokenDetailBadge === 'function') {
+    window.enhanceTokenDetailBadge();
+  } else {
+    // Fallback badge handling if function is not available
+    const chainBadge = document.querySelector('.token-detail-icon-container .chain-badge');
+    if (chainBadge && token.chainBadge) {
+      chainBadge.style.display = 'block';
+      const badgeImg = chainBadge.querySelector('img');
+      if (badgeImg) {
+        badgeImg.src = token.chainBadge;
+        badgeImg.alt = token.network || '';
+      }
+    } else if (chainBadge) {
+      chainBadge.style.display = 'none';
     }
-    
-    if (balanceValue) {
-      balanceValue.textContent = formatCurrency(token.value);
-    }
-    
-    // Update price info
-    const currentPrice = document.getElementById('token-current-price');
-    const priceChange = document.getElementById('token-price-change');
-    
-    if (currentPrice) {
-      currentPrice.textContent = formatCurrency(token.price);
-    }
-    
-    if (priceChange) {
-      priceChange.textContent = `${token.change >= 0 ? '+' : ''}${token.change}%`;
-      priceChange.className = token.change >= 0 ? 'positive' : 'negative';
-    }
-    
-    // Update network badge
-    enhanceTokenDetailBadge();
-    
-    // Update transaction list
-    if (typeof window.updateTransactionList === 'function') {
-      window.updateTransactionList(tokenId);
-    }
-    
-    // Show staking option if available
-    const stakingContainer = document.querySelector('.staking-container');
-    if (stakingContainer) {
-      const stakingTokens = ['eth', 'bnb', 'sol', 'ada', 'dot', 'matic'];
-      
-      if (stakingTokens.includes(tokenId)) {
-        stakingContainer.style.display = 'flex';
-        
-        // Set APY based on token
-        const apyValues = {
-          'eth': '4.8%',
-          'bnb': '5.2%',
-          'sol': '6.5%',
-          'ada': '5.0%',
-          'dot': '10.5%',
-          'matic': '8.2%'
-        };
-        
-        const apyElement = stakingContainer.querySelector('.staking-apy');
-        if (apyElement) {
-          apyElement.textContent = apyValues[tokenId] || '5.5%';
-        }
-        
-        // Set icon
-        const iconImg = stakingContainer.querySelector('.staking-icon img');
-        if (iconImg) {
-          iconImg.src = token.icon;
-        }
-      } else {
-        stakingContainer.style.display = 'none';
+  }
+  
+  // Clear and update transaction list
+  const transactionList = document.getElementById('transaction-list');
+  if (transactionList) {
+    // Clear existing transactions
+    while (transactionList.firstChild) {
+      if (!transactionList.firstChild.classList || 
+          !transactionList.firstChild.classList.contains('transaction-template')) {
+        transactionList.removeChild(transactionList.firstChild);
       }
     }
     
-    // Navigate to token detail screen
-    window.navigateTo('token-detail');
-    return true;
-  },
+    // Update with new transactions
+    if (typeof window.updateTransactionList === 'function') {
+      window.updateTransactionList(tokenId);
+    } else {
+      // Fallback transaction list population
+      this.populateTokenTransactions(tokenId, transactionList);
+    }
+  }
+  
+  // Show staking option if available
+  const stakingContainer = document.querySelector('.staking-container');
+  if (stakingContainer) {
+    const stakingTokens = ['eth', 'bnb', 'sol', 'ada', 'dot', 'matic'];
+    
+    if (stakingTokens.includes(tokenId)) {
+      stakingContainer.style.display = 'flex';
+      
+      // Set APY based on token
+      const apyValues = {
+        'eth': '4.8%',
+        'bnb': '5.2%',
+        'sol': '6.5%',
+        'ada': '5.0%',
+        'dot': '10.5%',
+        'matic': '8.2%'
+      };
+      
+      const apyElement = stakingContainer.querySelector('.staking-apy');
+      if (apyElement) {
+        apyElement.textContent = apyValues[tokenId] || '5.5%';
+      }
+      
+      // Set icon
+      const iconImg = stakingContainer.querySelector('.staking-icon img');
+      if (iconImg) {
+        iconImg.src = token.icon;
+      }
+    } else {
+      stakingContainer.style.display = 'none';
+    }
+  }
+  
+  // Setup token detail action buttons
+  this.setupTokenDetailActions(tokenId);
+  
+  // Navigate to token detail screen
+  try {
+    // First try the window function
+    if (typeof window.navigateTo === 'function') {
+      window.navigateTo('token-detail');
+    } else {
+      // Fallback to showing the screen manually
+      document.querySelectorAll('.screen').forEach(screen => {
+        screen.classList.add('hidden');
+      });
+      const tokenDetailScreen = document.getElementById('token-detail');
+      if (tokenDetailScreen) {
+        tokenDetailScreen.classList.remove('hidden');
+      }
+    }
+  } catch (error) {
+    console.error('Navigation error:', error);
+    // Last resort fallback
+    const tokenDetailScreen = document.getElementById('token-detail');
+    if (tokenDetailScreen) {
+      tokenDetailScreen.classList.remove('hidden');
+    }
+  }
+  
+  return true;
+},
+
+// Helper function to populate token transactions (fallback)
+populateTokenTransactions: function(tokenId, container) {
+  const activeWallet = window.activeWallet || 'main';
+  const transactions = window.currentTransactions?.[activeWallet]?.[tokenId] || [];
+  
+  if (transactions.length === 0) {
+    container.innerHTML = `
+      <div class="no-transactions">
+        <p>No transaction history available</p>
+        <div class="explorer-link">
+          <a href="#" id="view-on-explorer">View on Block Explorer</a>
+        </div>
+      </div>
+    `;
+    
+    // Add explorer link handler
+    const explorerLink = container.querySelector('#view-on-explorer');
+    if (explorerLink) {
+      explorerLink.addEventListener('click', function(e) {
+        e.preventDefault();
+        const explorerOverlay = document.getElementById('explorer-overlay');
+        if (explorerOverlay) {
+          explorerOverlay.style.display = 'flex';
+        }
+      });
+    }
+    return;
+  }
+  
+  // Get transaction template or create a bare one if needed
+  let template = document.querySelector('.transaction-template');
+  if (!template) {
+    template = document.createElement('div');
+    template.className = 'transaction-item';
+    template.innerHTML = `
+      <div class="transaction-icon">
+        <i class="fas"></i>
+      </div>
+      <div class="transaction-info">
+        <div class="transaction-type"></div>
+        <div class="transaction-date"></div>
+      </div>
+      <div class="transaction-amount">
+        <div class="transaction-value"></div>
+        <div class="transaction-usd"></div>
+      </div>
+    `;
+  }
+  
+  // Add transactions to container
+  transactions.forEach(tx => {
+    const txItem = template.cloneNode(true);
+    txItem.classList.remove('transaction-template');
+    txItem.classList.remove('hidden');
+    txItem.classList.add(`transaction-${tx.type}`);
+    
+    // Set icon
+    const icon = txItem.querySelector('.transaction-icon i');
+    if (icon) {
+      icon.className = `fas fa-${tx.type === 'receive' ? 'arrow-down' : 'arrow-up'}`;
+    }
+    
+    // Set text content
+    const typeEl = txItem.querySelector('.transaction-type');
+    if (typeEl) {
+      typeEl.textContent = `${tx.type === 'receive' ? 'Received' : 'Sent'} ${tx.symbol}`;
+    }
+    
+    const dateEl = txItem.querySelector('.transaction-date');
+    if (dateEl) {
+      dateEl.textContent = tx.date;
+    }
+    
+    const valueEl = txItem.querySelector('.transaction-value');
+    if (valueEl) {
+      valueEl.textContent = `${tx.type === 'receive' ? '+' : '-'}${tx.amount.toFixed(6)} ${tx.symbol}`;
+      valueEl.className = `transaction-value ${tx.type === 'receive' ? 'positive' : 'negative'}`;
+    }
+    
+    const usdEl = txItem.querySelector('.transaction-usd');
+    if (usdEl) {
+      // Use formatCurrency or fallback
+      usdEl.textContent = typeof formatCurrency === 'function' ? 
+        formatCurrency(tx.value) : 
+        `$${tx.value.toFixed(2)}`;
+    }
+    
+    // Add click handler for transaction details
+    txItem.addEventListener('click', function() {
+      const explorerOverlay = document.getElementById('explorer-overlay');
+      if (explorerOverlay) {
+        // Update explorer content (minimal implementation)
+        const txHash = explorerOverlay.querySelector('#explorer-tx-hash');
+        const txFrom = explorerOverlay.querySelector('#explorer-from');
+        const txTo = explorerOverlay.querySelector('#explorer-to');
+        const txAmount = explorerOverlay.querySelector('#explorer-token-amount');
+        
+        if (txHash) txHash.textContent = tx.hash || '0x...';
+        if (txFrom) txFrom.textContent = tx.from || '0x...';
+        if (txTo) txTo.textContent = tx.to || '0x...';
+        if (txAmount) txAmount.textContent = `${tx.amount.toFixed(6)} ${tx.symbol}`;
+        
+        // Show explorer
+        explorerOverlay.style.display = 'flex';
+      }
+    });
+    
+    container.appendChild(txItem);
+  });
+},
+
+// Set up token detail action buttons
+setupTokenDetailActions: function(tokenId) {
+  const detailSend = document.getElementById('detail-send');
+  const detailReceive = document.getElementById('detail-receive');
+  const detailBuy = document.getElementById('detail-buy');
+  const detailSwap = document.getElementById('detail-swap');
+  
+  if (detailSend) {
+    detailSend.onclick = () => {
+      if (typeof this.showSendScreen === 'function') {
+        this.showSendScreen(tokenId);
+      } else if (typeof window.showSendScreen === 'function') {
+        window.showSendScreen(tokenId);
+      } else {
+        window.navigateTo('send-screen');
+      }
+    };
+  }
+  
+  if (detailReceive) {
+    detailReceive.onclick = () => {
+      if (typeof this.showReceiveScreen === 'function') {
+        this.showReceiveScreen(tokenId);
+      } else if (typeof window.showReceiveScreen === 'function') {
+        window.showReceiveScreen(tokenId);
+      } else {
+        window.navigateTo('receive-screen');
+      }
+    };
+  }
+  
+  if (detailBuy) {
+    detailBuy.onclick = () => {
+      if (typeof window.showToast === 'function') {
+        window.showToast('Buy feature coming soon');
+      } else {
+        alert('Buy feature coming soon');
+      }
+    };
+  }
+  
+  if (detailSwap) {
+    detailSwap.onclick = () => {
+      if (typeof window.showToast === 'function') {
+        window.showToast('Swap feature coming soon');
+      } else {
+        alert('Swap feature coming soon');
+      }
+    };
+  }
+}
   
   showSendScreen: function(tokenId) {
     if (!tokenId) {
