@@ -1,3 +1,182 @@
+/* Trust Wallet UI Styles
+   Last updated: 2025-04-06 02:15:47
+   Author: aod33333 */
+
+/* Fix 1: Add proper vendor prefixes for better browser compatibility */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* Fix 2: Add missing mobile viewport rules */
+@viewport {
+    width: device-width;
+    zoom: 1.0;
+}
+
+/* Fix 3: Ensure proper z-index stacking */
+:root {
+    /* Existing color variables... */
+
+    /* Add z-index variables for proper layering */
+    --z-bottom-tabs: 1000;
+    --z-modals: 2000;
+    --z-tooltips: 3000;
+    --z-status-bar: 4000;
+    --z-toast: 5000;
+}
+
+/* Fix 4: Add proper overflow handling for app container */
+.app-container {
+    max-width: 480px;
+    height: 100%;
+    margin: 0 auto;
+    position: relative;
+    overflow-x: hidden;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch; /* For iOS momentum scroll */
+    background-color: var(--tw-white);
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+/* Fix 5: Improve screen transitions */
+.screen {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    background-color: var(--tw-white);
+    overflow-x: hidden;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    transition: transform 0.3s ease-in-out;
+}
+
+/* Fix 6: Add proper hidden class with transitions */
+.hidden {
+    display: none !important;
+    visibility: hidden;
+    opacity: 0;
+    pointer-events: none;
+}
+
+/* Fix 7: Improve bottom tabs positioning and styling */
+.bottom-tabs {
+    position: fixed !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    width: 100% !important;
+    z-index: var(--z-bottom-tabs) !important;
+    background-color: var(--tw-white) !important;
+    border-top: 1px solid var(--tw-bg-gray) !important;
+    padding: 8px 0 !important;
+    /* Add safe area padding for iOS */
+    padding-bottom: calc(8px + env(safe-area-inset-bottom)) !important;
+}
+
+/* Fix 8: Add safe area insets for modern devices */
+.status-bar {
+    padding-top: env(safe-area-inset-top);
+    z-index: var(--z-status-bar);
+}
+
+/* Fix 9: Improve toast notifications */
+.tw-toast {
+    position: fixed;
+    bottom: 80px;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: rgba(0,0,0,0.8);
+    color: white;
+    padding: 12px 20px;
+    border-radius: 8px;
+    font-size: 14px;
+    z-index: var(--z-toast);
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+.tw-toast.visible {
+    opacity: 1;
+    visibility: visible;
+}
+
+/* Fix 10: Add proper chain badge positioning */
+.chain-badge {
+    position: absolute !important;
+    bottom: -6px !important;
+    right: -6px !important;
+    width: 20px !important;
+    height: 20px !important;
+    border-radius: 50% !important;
+    background-color: var(--tw-white) !important;
+    border: 2px solid var(--tw-white) !important;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.1) !important;
+    z-index: 5 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    overflow: visible !important;
+}
+
+/* Fix 11: Add proper scroll momentum for iOS */
+.token-list,
+.transaction-list {
+    -webkit-overflow-scrolling: touch;
+    scroll-behavior: smooth;
+}
+
+/* Fix 12: Add proper touch handling for buttons */
+button {
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
+}
+
+/* Fix 13: Add proper dark mode support */
+@media (prefers-color-scheme: dark) {
+    :root {
+        --tw-white: #1F2128;
+        --tw-black: #FFFFFF;
+        --tw-bg-gray: #2C2F36;
+        --tw-dark-gray: #C4C9CC;
+        --tw-medium-gray: #8A939D;
+        --tw-light-gray: #5F6C75;
+    }
+}
+
+/* Fix 14: Add proper media queries for different screen sizes */
+@media screen and (max-width: 380px) {
+    .token-name {
+        font-size: 14px !important;
+    }
+    
+    .balance-amount {
+        font-size: 24px !important;
+    }
+}
+
+/* Fix 15: Add proper print styles */
+@media print {
+    .app-container {
+        height: auto;
+        overflow: visible;
+    }
+    
+    .bottom-tabs,
+    .status-bar {
+        display: none !important;
+    }
+}
+
 /* =================================================================
    PART 1: RESET, VARIABLES & BASE STYLES
    ================================================================= */
