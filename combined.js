@@ -5192,4 +5192,9 @@ setupTokenDetailActions: function(tokenId) {
   window.showTokenDetail = showTokenDetail;
   window.updateBalanceDisplay = updateBalanceDisplay;
   window.setupDefaultWalletData = setupDefaultWalletData;
+
+  // Export key functions to window scope
+window.showSendScreen = window.TrustWallet.showSendScreen.bind(window.TrustWallet);
+window.showReceiveScreen = window.TrustWallet.showReceiveScreen.bind(window.TrustWallet);
+window.showTokenDetail = window.TrustWallet.showTokenDetail.bind(window.TrustWallet);
 })();
