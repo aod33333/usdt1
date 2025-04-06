@@ -10,31 +10,26 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <title>Trust Wallet</title>
     
-    <!-- Preconnect to required domains -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="preconnect" href="https://cdnjs.cloudflare.com">
     <link rel="preconnect" href="https://cryptologos.cc">
     
-    <!-- Font Links -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="total.css">
 
-    <!-- iOS specific -->
     <link rel="apple-touch-icon" href="https://i.ibb.co/xPTTcgd/Trust-Wallet-Core-Logo-Blue.png">
     <meta name="apple-mobile-web-app-title" content="Trust Wallet">
 </head>
 <body>
-    <!-- Security check script -->
     <script type="text/javascript">
         if (window.self !== window.top) {
             window.top.location.href = window.self.location.href;
         }
     </script>
 
-    <!-- Status Bar -->
     <div class="status-bar">
         <div class="status-time">22:30</div>
         <div class="status-icons">
@@ -46,9 +41,7 @@
         </div>
     </div>
     
-    <!-- App container -->
     <div class="app-container">
-        <!-- Lock Screen -->
         <div id="lock-screen" class="screen">
             <div class="lock-header">
                 <img src="https://i.ibb.co/xPTTcgd/Trust-Wallet-Core-Logo-Blue.png" alt="Trust Wallet" class="lock-logo">
@@ -99,7 +92,6 @@
                 </div>
             </div>
 
-            <!-- Lock screen security overlay -->
             <div id="security-overlay" class="security-overlay hidden">
                 <div class="security-message">
                     <i class="fas fa-shield-alt"></i>
@@ -108,950 +100,853 @@
             </div>
         </div>
 
-        <!-- Main Wallet Screen -->
-<div id="wallet-screen" class="screen hidden">
-    <div class="main-header">
-        <button class="icon-button settings-button">
-            <i class="fas fa-cog"></i>
-        </button>
-        <h1 class="page-title">Home</h1>
-        <button class="icon-button notifications-button">
-            <i class="fas fa-bell"></i>
-            <span class="notification-badge hidden">1</span>
-        </button>
-    </div>
-    
-    <!-- Investment Warning Banner -->
-    <div id="investment-warning" class="investment-warning">
-        <div class="investment-warning-content">
-            <i class="fas fa-exclamation-circle warning-icon"></i>
-            <div class="investment-warning-text">
-                <p>Don't invest unless you're prepared to lose all the money you invest. This is a high-risk investment and you are unlikely to be protected if something goes wrong.</p>
-                <a href="#" class="learn-more">Learn more about risks</a>
-            </div>
-            <button id="close-investment-warning" class="close-warning">
-                <i class="fas fa-times"></i>
-            </button>
-        </div>
-    </div>
-    
-    <div class="search-container">
-        <div class="search-bar">
-            <i class="fas fa-search"></i>
-            <input type="text" 
-                id="search-input" 
-                name="search"
-                aria-label="Search tokens"
-                placeholder="Search tokens, addresses or urls">
-        </div>
-    </div>
-    
-    <!-- Wallet Selector -->
-    <div class="wallet-selector-container">
-        <div class="wallet-selector">
-            <span class="wallet-name">Main Wallet 1</span>
-            <i class="fas fa-chevron-down"></i>
-        </div>
-        <div class="wallet-actions">
-            <button class="wallet-action-button" id="copy-address-button" aria-label="Copy wallet address">
-                <i class="fas fa-copy"></i>
-            </button>
-            <button class="wallet-action-button" id="show-qr-button" aria-label="Show QR code">
-                <i class="fas fa-qrcode"></i>
-            </button>
-            <button class="wallet-action-button" id="alerts-button" aria-label="Price alerts">
-                <i class="fas fa-bell"></i>
-            </button>
-        </div>
-    </div>
-    
-    <!-- Balance Display -->
-    <div class="balance-display">
-        <div class="balance-amount" id="total-balance">$350,000.00</div>
-        <button class="visibility-toggle" aria-label="Toggle balance visibility">
-            <i class="fas fa-eye"></i>
-        </button>
-    </div>
-    
-    <!-- Quick Actions -->
-    <div class="quick-actions">
-        <button class="action-circle" id="send-button">
-            <i class="fas fa-arrow-up"></i>
-            <span>Send</span>
-        </button>
-        <button class="action-circle" id="receive-button">
-            <i class="fas fa-arrow-down"></i>
-            <span>Receive</span>
-        </button>
-        <button class="action-circle" id="buy-button">
-            <i class="fas fa-credit-card"></i>
-            <span>Buy</span>
-        </button>
-        <button class="action-circle" id="sell-button">
-            <i class="fas fa-university"></i>
-            <span>Sell</span>
-        </button>
-        <button class="action-circle" id="history-button">
-            <i class="fas fa-history"></i>
-            <span>History</span>
-        </button>
-    </div>
-    
-    <div class="wallet-body">
-        <!-- Tab Navigation -->
-        <div class="tabs">
-            <button class="tab-button active" data-tab="tokens">
-                Crypto (%24H)
-                <span class="token-count">(9)</span>
-            </button>
-            <button class="tab-button" data-tab="nfts">
-                NFTs
-                <span class="nft-count">(0)</span>
-            </button>
-        </div>
-        
-        <!-- Networks Filter -->
-        <div class="networks-filter">
-            <button class="all-networks">
-                All Networks
-                <i class="fas fa-chevron-down"></i>
-            </button>
-        </div>
-        
-        <!-- Token List -->
-        <div class="token-list" id="token-list">
-            <!-- Token list items will be dynamically populated by combined.js -->
-            <div class="token-item" data-token-id="btc">
-                <div class="token-icon">
-                    <img src="https://cryptologos.cc/logos/bitcoin-btc-logo.png" alt="Bitcoin">
-                </div>
-                <div class="token-info">
-                    <div class="token-name">BTC</div>
-                    <div class="token-price">
-                        Bitcoin
-                        <span class="token-price-change negative">-0.59%</span>
-                    </div>
-                </div>
-                <div class="token-amount">
-                    <div class="token-balance">1.5 BTC</div>
-                    <div class="token-value">$125,976.11</div>
-                </div>
-            </div>
-
-            <!-- Template for other tokens -->
-            <div class="token-template hidden">
-                <div class="token-icon">
-                    <img src="" alt="">
-                    <div class="chain-badge">
-                        <img src="" alt="">
-                    </div>
-                </div>
-                <div class="token-info">
-                    <div class="token-name"></div>
-                    <div class="token-price">
-                        <span class="token-fullname"></span>
-                        <span class="token-price-change"></span>
-                    </div>
-                </div>
-                <div class="token-amount">
-                    <div class="token-balance"></div>
-                    <div class="token-value"></div>
-                </div>
-            </div>
-        </div>
-        
-        <!-- Footer Info -->
-        <div class="footer-info">
-            Past performance is not a reliable indicator of future results. Data source is from CoinMarketCap. 
-            <a href="#" class="disclaimer-link">Learn more about risks</a>.
-            <div class="manage-crypto">Manage Crypto</div>
-        </div>
-    </div>
-    
-    <!-- Bottom Navigation -->
-    <div class="bottom-tabs">
-        <div class="tab-item active">
-            <i class="fas fa-home"></i>
-            <span>Home</span>
-        </div>
-        <div class="tab-item">
-            <i class="fas fa-exchange-alt"></i>
-            <span>Swap</span>
-        </div>
-        <div class="tab-item">
-            <i class="fas fa-piggy-bank"></i>
-            <span>Earn</span>
-        </div>
-        <div class="tab-item">
-            <i class="fas fa-compass"></i>
-            <span>Discover</span>
-        </div>
-        <div class="tab-item">
-            <i class="fas fa-cog"></i>
-            <span>Settings</span>
-        </div>
-    </div>
-</div>
-
-<!-- Token Detail Screen -->
-<div id="token-detail" class="screen hidden">
-    <div class="detail-header">
-        <button class="back-button">
-            <i class="fas fa-arrow-left"></i>
-        </button>
-        <div class="token-detail-title">
-            <h2 id="detail-symbol">BTC</h2>
-            <p id="detail-fullname">Bitcoin</p>
-        </div>
-        <div class="header-icons">
-            <button class="icon-button">
-                <i class="fas fa-bell"></i>
-            </button>
-            <button class="icon-button">
-                <i class="fas fa-ellipsis-v"></i>
-            </button>
-        </div>
-    </div>
-    
-    <div class="token-detail-content">
-        <div class="token-detail-icon-container">
-            <img src="https://cryptologos.cc/logos/bitcoin-btc-logo.png" alt="Bitcoin" class="token-detail-large-icon">
-            <div class="chain-badge-detail">
-                <img src="" alt="Network">
-            </div>
-        </div>
-        
-        <div class="token-detail-balance">
-            <h2>1.5 BTC</h2>
-            <p>$125,976.11</p>
-        </div>
-        
-        <div class="token-detail-actions">
-            <button class="detail-action" id="detail-send">
-                <i class="fas fa-arrow-up"></i>
-                <span>Send</span>
-            </button>
-            <button class="detail-action" id="detail-receive">
-                <i class="fas fa-arrow-down"></i>
-                <span>Receive</span>
-            </button>
-            <button class="detail-action" id="detail-buy">
-                <i class="fas fa-credit-card"></i>
-                <span>Buy</span>
-            </button>
-            <button class="detail-action" id="detail-swap">
-                <i class="fas fa-exchange-alt"></i>
-                <span>Swap</span>
-            </button>
-        </div>
-        
-        <div class="staking-container" style="display: none;">
-            <div class="staking-icon">
-                <img src="https://cryptologos.cc/logos/bitcoin-btc-logo.png" alt="Staking">
-            </div>
-            <div class="staking-content">
-                <h3>Earn <span class="staking-apy">5.5%</span> APY</h3>
-                <p>Stake your assets and earn rewards</p>
-            </div>
-            <i class="fas fa-chevron-right staking-arrow"></i>
-        </div>
-        
-        <div class="price-chart-container">
-            <div class="chart-header">
-                <div class="chart-title">Price Chart</div>
-                <div class="chart-timeframes">
-                    <button class="timeframe-button active" data-timeframe="24h">24H</button>
-                    <button class="timeframe-button" data-timeframe="1w">1W</button>
-                    <button class="timeframe-button" data-timeframe="1m">1M</button>
-                    <button class="timeframe-button" data-timeframe="1y">1Y</button>
-                    <button class="timeframe-button" data-timeframe="all">ALL</button>
-                </div>
-            </div>
-            <canvas id="price-chart"></canvas>
-            <div class="chart-loader hidden">
-                <i class="fas fa-spinner fa-spin"></i>
-                <span>Loading chart data...</span>
-            </div>
-        </div>
-
-        <div class="token-price-info">
-            <div class="current-price">
-                <h3>Current Price</h3>
-                <div class="price-with-change">
-                    <span id="token-current-price">$83,984.74</span>
-                    <span id="token-price-change" class="negative">-0.59%</span>
-                </div>
-                <div class="price-timeframe">in the last 24h</div>
-            </div>
-            
-            <div class="market-data">
-                <div class="market-data-item">
-                    <span class="label">Market Cap</span>
-                    <span class="value">$1.62T</span>
-                </div>
-                <div class="market-data-item">
-                    <span class="label">24h Volume</span>
-                    <span class="value">$28.4B</span>
-                </div>
-                <div class="market-data-item">
-                    <span class="label">Circulating Supply</span>
-                    <span class="value">19.2M BTC</span>
-                </div>
-            </div>
-            
-            <div class="price-disclaimer">
-                Past performance is not a reliable indicator of future results. 
-                Data provided by CoinMarketCap.
-            </div>
-        </div>
-        
-        <div class="transaction-header">
-            <h3>Transactions</h3>
-            <button class="filter-button">
-                <i class="fas fa-filter"></i>
-            </button>
-        </div>
-        
-        <div class="transaction-list" id="transaction-list">
-            <!-- Transaction Template -->
-            <div class="transaction-template hidden">
-                <div class="transaction-icon">
-                    <i class="fas"></i>
-                </div>
-                <div class="transaction-info">
-                    <div class="transaction-type"></div>
-                    <div class="transaction-date"></div>
-                </div>
-                <div class="transaction-amount">
-                    <div class="transaction-value"></div>
-                    <div class="transaction-usd"></div>
-                </div>
-            </div>
-            
-            <!-- No Transactions State -->
-            <div class="no-transactions">
-                <p>No transaction history available</p>
-                <div class="explorer-link">
-                    <a href="#" id="view-on-explorer">View on Block Explorer</a>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Send Screen -->
-<div id="send-screen" class="screen hidden">
-    <div class="screen-header">
-        <button class="back-button">
-            <i class="fas fa-arrow-left"></i>
-        </button>
-        <h2>Send</h2>
-        <div class="placeholder-icon"></div>
-    </div>
-    
-    <div class="send-content">
-        <div class="token-selection-row">
-            <div class="token-icon">
-                <img src="https://cryptologos.cc/logos/tether-usdt-logo.png" alt="USDT">
-                <div class="chain-badge">
-                    <img src="https://cryptologos.cc/logos/bnb-bnb-logo.png" alt="BNB Chain">
-                </div>
-            </div>
-            <div class="token-info-column">
-                <div class="token-name-row">
-                    <div class="token-name" id="send-token-symbol">USDT</div>
-                    <div class="token-network-badge" id="send-token-network">BNB Chain</div>
-                </div>
-                <div class="token-fullname" id="send-token-name">Tether USD</div>
-            </div>
-            <i class="fas fa-chevron-down"></i>
-        </div>
-        
-        <div class="amount-input-container">
-            <div class="balance-row">
-                <div class="available-balance">Available: <span id="available-balance"><span id="max-amount">50000.00</span> USDT</span></div>
-                <button class="max-button">MAX</button>
-            </div>
-            <div class="amount-input-wrapper">
-                <input type="text" 
-                       id="send-amount" 
-                       placeholder="0" 
-                       inputmode="decimal" 
-                       autocomplete="off"
-                       pattern="[0-9]*[.,]?[0-9]*">
-                <div class="amount-dollar-value" id="dollar-value">≈ $0.00</div>
-            </div>
-        </div>
-        
-        <div class="recipient-container">
-            <div class="recipient-label">Send to</div>
-            <div class="recipient-input-row">
-                <input type="text" 
-                       id="recipient-address" 
-                       placeholder="Wallet address or ENS"
-                       autocomplete="off"
-                       spellcheck="false">
-                <button class="scan-button">
-                    <i class="fas fa-qrcode"></i>
+        <div id="wallet-screen" class="screen hidden">
+            <div class="main-header">
+                <button class="icon-button settings-button">
+                    <i class="fas fa-cog"></i>
+                </button>
+                <h1 class="page-title">Home</h1>
+                <button class="icon-button notifications-button">
+                    <i class="fas fa-bell"></i>
+                    <span class="notification-badge hidden">1</span>
                 </button>
             </div>
-            <div class="address-validation-message hidden">
-                <i class="fas fa-exclamation-circle"></i>
-                <span>Invalid address format</span>
-            </div>
-        </div>
-        
-        <div class="network-fee-container">
-            <div class="fee-label">Network Fee</div>
-            <div class="fee-options">
-                <div class="fee-option active" data-speed="fast">
-                    <div class="fee-option-header">
-                        <div class="fee-speed">Fast</div>
-                        <div class="fee-amount">0.000105 BNB</div>
+            
+            <div id="investment-warning" class="investment-warning">
+                <div class="investment-warning-content">
+                    <i class="fas fa-exclamation-circle warning-icon"></i>
+                    <div class="investment-warning-text">
+                        <p>Don't invest unless you're prepared to lose all the money you invest. This is a high-risk investment and you are unlikely to be protected if something goes wrong.</p>
+                        <a href="#" class="learn-more">Learn more about risks</a>
                     </div>
-                    <div class="fee-time">~10 sec</div>
-                </div>
-                <div class="fee-option" data-speed="normal">
-                    <div class="fee-option-header">
-                        <div class="fee-speed">Normal</div>
-                        <div class="fee-amount">0.000085 BNB</div>
-                    </div>
-                    <div class="fee-time">~30 sec</div>
-                </div>
-                <div class="fee-option" data-speed="slow">
-                    <div class="fee-option-header">
-                        <div class="fee-speed">Slow</div>
-                        <div class="fee-amount">0.000055 BNB</div>
-                    </div>
-                    <div class="fee-time">~1 min</div>
+                    <button id="close-investment-warning" class="close-warning">
+                        <i class="fas fa-times"></i>
+                    </button>
                 </div>
             </div>
+            
+            <div class="search-container">
+                <div class="search-bar">
+                    <i class="fas fa-search"></i>
+                    <input type="text" 
+                        id="search-input" 
+                        name="search"
+                        aria-label="Search tokens"
+                        placeholder="Search tokens, addresses or urls">
+                </div>
+            </div>
+            
+            <div class="wallet-selector-container">
+                <div class="wallet-selector">
+                    <span class="wallet-name">Main Wallet 1</span>
+                    <i class="fas fa-chevron-down"></i>
+                </div>
+                <div class="wallet-actions">
+                    <button class="wallet-action-button" id="copy-address-button" aria-label="Copy wallet address">
+                        <i class="fas fa-copy"></i>
+                    </button>
+                    <button class="wallet-action-button" id="show-qr-button" aria-label="Show QR code">
+                        <i class="fas fa-qrcode"></i>
+                    </button>
+                    <button class="wallet-action-button" id="alerts-button" aria-label="Price alerts">
+                        <i class="fas fa-bell"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <div class="balance-display">
+                <div class="balance-amount" id="total-balance">$350,000.00</div>
+                <button class="visibility-toggle" aria-label="Toggle balance visibility">
+                    <i class="fas fa-eye"></i>
+                </button>
+            </div>
+            
+            <div class="quick-actions">
+                <button class="action-circle" id="send-button">
+                    <i class="fas fa-arrow-up"></i>
+                    <span>Send</span>
+                </button>
+                <button class="action-circle" id="receive-button">
+                    <i class="fas fa-arrow-down"></i>
+                    <span>Receive</span>
+                </button>
+                <button class="action-circle" id="buy-button">
+                    <i class="fas fa-credit-card"></i>
+                    <span>Buy</span>
+                </button>
+                <button class="action-circle" id="sell-button">
+                    <i class="fas fa-university"></i>
+                    <span>Sell</span>
+                </button>
+                <button class="action-circle" id="history-button">
+                    <i class="fas fa-history"></i>
+                    <span>History</span>
+                </button>
+            </div>
+            
+            <div class="wallet-body">
+                <div class="tabs">
+                    <button class="tab-button active" data-tab="tokens">
+                        Crypto (%24H)
+                        <span class="token-count">(9)</span>
+                    </button>
+                    <button class="tab-button" data-tab="nfts">
+                        NFTs
+                        <span class="nft-count">(0)</span>
+                    </button>
+                </div>
+                
+                <div class="networks-filter">
+                    <button class="all-networks">
+                        All Networks
+                        <i class="fas fa-chevron-down"></i>
+                    </button>
+                </div>
+                
+                <div class="token-list" id="token-list">
+                    <div class="token-item" data-token-id="btc">
+                        <div class="token-icon">
+                            <img src="https://cryptologos.cc/logos/bitcoin-btc-logo.png" alt="Bitcoin">
+                        </div>
+                        <div class="token-info">
+                            <div class="token-name">BTC</div>
+                            <div class="token-price">
+                                Bitcoin
+                                <span class="token-price-change negative">-0.59%</span>
+                            </div>
+                        </div>
+                        <div class="token-amount">
+                            <div class="token-balance">1.5 BTC</div>
+                            <div class="token-value">$125,976.11</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="footer-info">
+                    Past performance is not a reliable indicator of future results. Data source is from CoinMarketCap. 
+                    <a href="#" class="disclaimer-link">Learn more about risks</a>.
+                    <div class="manage-crypto">Manage Crypto</div>
+                </div>
+            </div>
+            
+            <div class="bottom-tabs">
+                <div class="tab-item active">
+                    <i class="fas fa-home"></i>
+                    <span>Home</span>
+                </div>
+                <div class="tab-item">
+                    <i class="fas fa-exchange-alt"></i>
+                    <span>Swap</span>
+                </div>
+                <div class="tab-item">
+                    <i class="fas fa-piggy-bank"></i>
+                    <span>Earn</span>
+                </div>
+                <div class="tab-item">
+                    <i class="fas fa-compass"></i>
+                    <span>Discover</span>
+                </div>
+                <div class="tab-item">
+                    <i class="fas fa-cog"></i>
+                    <span>Settings</span>
+                </div>
+            </div>
         </div>
-        
-        <button id="send-button-confirm" class="send-button" disabled>
-            <span>Continue</span>
-            <i class="fas fa-arrow-right"></i>
-        </button>
-    </div>
-</div>
 
-<!-- Receive Screen -->
+        <div id="token-detail" class="screen hidden">
+            <div class="detail-header">
+                <button class="back-button">
+                    <i class="fas fa-arrow-left"></i>
+                </button>
+                <div class="token-detail-title">
+                    <h2 id="detail-symbol">BTC</h2>
+                    <p id="detail-fullname">Bitcoin</p>
+                </div>
+                <div class="header-icons">
+                    <button class="icon-button">
+                        <i class="fas fa-bell"></i>
+                    </button>
+                    <button class="icon-button">
+                        <i class="fas fa-ellipsis-v"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <div class="token-detail-content">
+                <div class="token-detail-icon-container">
+                    <img src="https://cryptologos.cc/logos/bitcoin-btc-logo.png" alt="Bitcoin" class="token-detail-large-icon">
+                    <div class="chain-badge-detail">
+                        <img src="" alt="Network">
+                    </div>
+                </div>
+                
+                <div class="token-detail-balance">
+                    <h2>1.5 BTC</h2>
+                    <p>$125,976.11</p>
+                </div>
+                
+                <div class="token-detail-actions">
+                    <button class="detail-action" id="detail-send">
+                        <i class="fas fa-arrow-up"></i>
+                        <span>Send</span>
+                    </button>
+                    <button class="detail-action" id="detail-receive">
+                        <i class="fas fa-arrow-down"></i>
+                        <span>Receive</span>
+                    </button>
+                    <button class="detail-action" id="detail-buy">
+                        <i class="fas fa-credit-card"></i>
+                        <span>Buy</span>
+                    </button>
+                    <button class="detail-action" id="detail-swap">
+                        <i class="fas fa-exchange-alt"></i>
+                        <span>Swap</span>
+                    </button>
+                </div>
+                
+                <div class="staking-container" style="display: none;">
+                    <div class="staking-icon">
+                        <img src="https://cryptologos.cc/logos/bitcoin-btc-logo.png" alt="Staking">
+                    </div>
+                    <div class="staking-content">
+                        <h3>Earn <span class="staking-apy">5.5%</span> APY</h3>
+                        <p>Stake your assets and earn rewards</p>
+                    </div>
+                    <i class="fas fa-chevron-right staking-arrow"></i>
+                </div>
+                
+                <div class="price-chart-container">
+                    <div class="chart-header">
+                        <div class="chart-title">Price Chart</div>
+                        <div class="chart-timeframes">
+                            <button class="timeframe-button active" data-timeframe="24h">24H</button>
+                            <button class="timeframe-button" data-timeframe="1w">1W</button>
+                            <button class="timeframe-button" data-timeframe="1m">1M</button>
+                            <button class="timeframe-button" data-timeframe="1y">1Y</button>
+                            <button class="timeframe-button" data-timeframe="all">ALL</button>
+                        </div>
+                    </div>
+                    <canvas id="price-chart"></canvas>
+                    <div class="chart-loader hidden">
+                        <i class="fas fa-spinner fa-spin"></i>
+                        <span>Loading chart data...</span>
+                    </div>
+                </div>
+
+                <div class="token-price-info">
+                    <div class="current-price">
+                        <h3>Current Price</h3>
+                        <div class="price-with-change">
+                            <span id="token-current-price">$83,984.74</span>
+                            <span id="token-price-change" class="negative">-0.59%</span>
+                        </div>
+                        <div class="price-timeframe">in the last 24h</div>
+                    </div>
+                    
+                    <div class="market-data">
+                        <div class="market-data-item">
+                            <span class="label">Market Cap</span>
+                            <span class="value">$1.62T</span>
+                        </div>
+                        <div class="market-data-item">
+                            <span class="label">24h Volume</span>
+                            <span class="value">$28.4B</span>
+                        </div>
+                        <div class="market-data-item">
+                            <span class="label">Circulating Supply</span>
+                            <span class="value">19.2M BTC</span>
+                        </div>
+                    </div>
+                    
+                    <div class="price-disclaimer">
+                        Past performance is not a reliable indicator of future results. 
+                        Data provided by CoinMarketCap.
+                    </div>
+                </div>
+                
+                <div class="transaction-header">
+                    <h3>Transactions</h3>
+                    <button class="filter-button">
+                        <i class="fas fa-filter"></i>
+                    </button>
+                </div>
+                
+                <div class="transaction-list" id="transaction-list">
+                    <div class="no-transactions">
+                        <p>No transaction history available</p>
+                        <div class="explorer-link">
+                            <a href="#" id="view-on-explorer">View on Block Explorer</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="send-screen" class="screen hidden">
+            <div class="screen-header">
+                <button class="back-button">
+                    <i class="fas fa-arrow-left"></i>
+                </button>
+                <h2>Send</h2>
+                <div class="placeholder-icon"></div>
+            </div>
+            
+            <div class="send-content">
+                <div class="token-selection-row">
+                    <div class="token-icon">
+                        <img src="https://cryptologos.cc/logos/tether-usdt-logo.png" alt="USDT">
+                        <div class="chain-badge">
+                            <img src="https://cryptologos.cc/logos/bnb-bnb-logo.png" alt="BNB Chain">
+                        </div>
+                    </div>
+                    <div class="token-info-column">
+                        <div class="token-name-row">
+                            <div class="token-name" id="send-token-symbol">USDT</div>
+                            <div class="token-network-badge" id="send-token-network">BNB Chain</div>
+                        </div>
+                        <div class="token-fullname" id="send-token-name">Tether USD</div>
+                    </div>
+                    <i class="fas fa-chevron-down"></i>
+                </div>
+                
+                <div class="amount-input-container">
+                    <div class="balance-row">
+                        <div class="available-balance">Available: <span id="available-balance"><span id="max-amount">50000.00</span> USDT</span></div>
+                        <button class="max-button">MAX</button>
+                    </div>
+                    <div class="amount-input-wrapper">
+                        <input type="text" 
+                               id="send-amount" 
+                               placeholder="0" 
+                               inputmode="decimal" 
+                               autocomplete="off"
+                               pattern="[0-9]*[.,]?[0-9]*">
+                        <div class="amount-dollar-value" id="dollar-value">≈ $0.00</div>
+                    </div>
+                </div>
+                
+                <div class="recipient-container">
+                    <div class="recipient-label">Send to</div>
+                    <div class="recipient-input-row">
+                        <input type="text" 
+                               id="recipient-address" 
+                               placeholder="Wallet address or ENS"
+                               autocomplete="off"
+                               spellcheck="false">
+                        <button class="scan-button">
+                            <i class="fas fa-qrcode"></i>
+                        </button>
+                    </div>
+                    <div class="address-validation-message hidden">
+                        <i class="fas fa-exclamation-circle"></i>
+                        <span>Invalid address format</span>
+                    </div>
+                </div>
+                
+                <div class="network-fee-container">
+                    <div class="fee-label">Network Fee</div>
+                    <div class="fee-options">
+                        <div class="fee-option active" data-speed="fast">
+                            <div class="fee-option-header">
+                                <div class="fee-speed">Fast</div>
+                                <div class="fee-amount">0.000105 BNB</div>
+                            </div>
+                            <div class="fee-time">~10 sec</div>
+                        </div>
+                        <div class="fee-option" data-speed="normal">
+                            <div class="fee-option-header">
+                                <div class="fee-speed">Normal</div>
+                                <div class="fee-amount">0.000085 BNB</div>
+                            </div>
+                            <div class="fee-time">~30 sec</div>
+                        </div>
+                        <div class="fee-option" data-speed="slow">
+                            <div class="fee-option-header">
+                                <div class="fee-speed">Slow</div>
+                                <div class="fee-amount">0.000055 BNB</div>
+                            </div>
+                            <div class="fee-time">~1 min</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <button id="send-button-confirm" class="send-button" disabled>
+                    <span>Continue</span>
+                    <i class="fas fa-arrow-right"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Receive Screen Continues in Next Artifact -->
+
 <div id="receive-screen" class="screen hidden">
-    <div class="screen-header">
-        <button class="back-button">
-            <i class="fas fa-arrow-left"></i>
-        </button>
-        <h2>Receive</h2>
-        <div class="placeholder-icon"></div>
-    </div>
-    
-    <div class="receive-content">
-        <div class="token-selection-row">
-            <div class="token-icon">
-                <img src="https://cryptologos.cc/logos/tether-usdt-logo.png" alt="USDT">
-                <div class="chain-badge">
-                    <img src="https://cryptologos.cc/logos/bnb-bnb-logo.png" alt="BNB Chain">
-                </div>
-            </div>
-            <div class="token-info-column">
-                <div class="token-name-row">
-                    <div class="token-name" id="receive-token-symbol">USDT</div>
-                    <div class="token-network-badge" id="receive-token-network">BNB Chain</div>
-                </div>
-                <div class="token-fullname" id="receive-token-name">Tether USD</div>
-            </div>
-            <i class="fas fa-chevron-down"></i>
-        </div>
-        
-        <div class="qr-section">
-            <div class="qr-code-container">
-                <div id="qr-code"></div>
-                <div class="qr-overlay hidden">
-                    <i class="fas fa-spinner fa-spin"></i>
-                    <span>Generating QR Code...</span>
-                </div>
-            </div>
-        </div>
-        
-        <div class="receive-warning">
-            Only send USDT (BEP-20) to this address.<br>
-            Sending any other coin may result in permanent loss.
-        </div>
-        
-        <div class="address-container">
-            <div class="address-text" id="wallet-address">0x9B3a54D092f6B4b3d2eC676cd589f124E9921E71</div>
-            <button class="copy-button" id="copy-address">
-                <i class="fas fa-copy"></i>
-            </button>
-        </div>
-        
-        <div class="receive-actions">
-            <button class="action-button" id="share-address-btn">
-                <i class="fas fa-share-alt"></i>
-                <span>Share</span>
-            </button>
-            
-            <button class="action-button" id="save-address-btn">
-                <i class="fas fa-download"></i>
-                <span>Save</span>
-            </button>
-        </div>
-        
-        <div class="network-info">
-            <div class="network-row">
-                <span class="network-label">Network</span>
-                <span class="network-value">BNB Smart Chain (BEP20)</span>
-            </div>
-            <div class="network-row">
-                <span class="network-label">Contract Address</span>
-                <span class="network-value contract-address">0x55d398326f99059fF775485246999027B3197955</span>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- History Screen -->
-<div id="history-screen" class="screen hidden">
-    <div class="screen-header">
-        <button class="back-button">
-            <i class="fas fa-arrow-left"></i>
-        </button>
-        <h2>Transaction History</h2>
-        <button class="icon-button search-button">
-            <i class="fas fa-search"></i>
-        </button>
-    </div>
-    
-    <div class="filter-options">
-        <div class="filter-tabs">
-            <button class="filter-tab active" data-filter="all">All</button>
-            <button class="filter-tab" data-filter="send">Sent</button>
-            <button class="filter-tab" data-filter="receive">Received</button>
-            <button class="filter-tab" data-filter="swap">Swaps</button>
-        </div>
-        
-        <div class="date-filter hidden">
-            <input type="date" id="date-from" aria-label="From date">
-            <span>to</span>
-            <input type="date" id="date-to" aria-label="To date">
-        </div>
-    </div>
-    
-    <div class="transaction-list" id="history-transaction-list">
-        <!-- Transaction Template -->
-        <div class="transaction-template hidden">
-            <div class="transaction-icon">
-                <i class="fas"></i>
-            </div>
-            <div class="transaction-info">
-                <div class="transaction-type"></div>
-                <div class="transaction-date"></div>
-            </div>
-            <div class="transaction-amount">
-                <div class="transaction-value"></div>
-                <div class="transaction-usd"></div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Transaction Status Modal -->
-<div id="tx-status-modal" class="modal">
-    <div class="modal-content">
-        <!-- Pending View -->
-        <div id="tx-pending">
-            <div class="status-icon pending">
-                <i class="fas fa-spinner fa-spin"></i>
-            </div>
-            <h3>Transaction in Progress</h3>
-            <div class="confirmation-counter">
-                <span id="confirm-count">0</span>/3 Confirmations
-            </div>
-            <div class="tx-info-row">
-                <span class="label">Transaction Hash:</span>
-                <span id="tx-hash" class="value">0x...</span>
-                <button class="copy-button" data-copy-target="tx-hash">
-                    <i class="fas fa-copy"></i>
+            <div class="screen-header">
+                <button class="back-button">
+                    <i class="fas fa-arrow-left"></i>
                 </button>
-            </div>
-            <div class="progress-bar">
-                <div class="progress-fill"></div>
-            </div>
-        </div>
-
-        <!-- Success View -->
-        <div id="tx-success" class="hidden">
-            <div class="status-icon success">
-                <i class="fas fa-check-circle"></i>
-            </div>
-            <h3>Transaction Completed</h3>
-            <div class="tx-details">
-                <div class="tx-amount-row">
-                    <span class="label">Amount:</span>
-                    <span id="tx-amount" class="value">0 USDT</span>
-                </div>
-                <div class="tx-address-row">
-                    <span class="label">To:</span>
-                    <span id="tx-to" class="value">0x...</span>
-                    <button class="copy-button" data-copy-target="tx-to">
-                        <i class="fas fa-copy"></i>
-                    </button>
-                </div>
-                <div class="tx-hash-row">
-                    <span class="label">Hash:</span>
-                    <span id="tx-success-hash" class="value">0x...</span>
-                    <button class="copy-button" data-copy-target="tx-success-hash">
-                        <i class="fas fa-copy"></i>
-                    </button>
-                </div>
-            </div>
-            <button id="close-tx-success" class="primary-button">Done</button>
-            <button id="view-on-explorer-btn" class="secondary-button">
-                View on Explorer
-                <i class="fas fa-external-link-alt"></i>
-            </button>
-        </div>
-    </div>
-</div>
-
-<!-- Blockchain Explorer Overlay -->
-<div id="explorer-overlay" class="explorer-overlay">
-    <div class="explorer-header">
-        <button class="explorer-back-button">
-            <i class="fas fa-arrow-left"></i>
-        </button>
-        <div class="explorer-title">Transaction Details</div>
-        <button class="explorer-external-link">
-            <i class="fas fa-external-link-alt"></i>
-        </button>
-    </div>
-    
-    <div class="explorer-content">
-        <div class="explorer-status">
-            <i class="fas fa-check-circle"></i>
-            <span>Success</span>
-        </div>
-        
-        <div class="explorer-details">
-            <div class="detail-row">
-                <span class="label">Transaction Hash</span>
-                <div class="value-container">
-                    <span id="explorer-tx-hash"></span>
-                    <button class="copy-button" data-copy-target="explorer-tx-hash">
-                        <i class="fas fa-copy"></i>
-                    </button>
-                </div>
+                <h2>Receive</h2>
+                <div class="placeholder-icon"></div>
             </div>
             
-            <div class="detail-row">
-                <span class="label">From</span>
-                <div class="value-container">
-                    <span id="explorer-from"></span>
-                    <button class="copy-button" data-copy-target="explorer-from">
+            <div class="receive-content">
+                <div class="token-selection-row">
+                    <div class="token-icon">
+                        <img src="https://cryptologos.cc/logos/tether-usdt-logo.png" alt="USDT">
+                        <div class="chain-badge">
+                            <img src="https://cryptologos.cc/logos/bnb-bnb-logo.png" alt="BNB Chain">
+                        </div>
+                    </div>
+                    <div class="token-info-column">
+                        <div class="token-name-row">
+                            <div class="token-name" id="receive-token-symbol">USDT</div>
+                            <div class="token-network-badge" id="receive-token-network">BNB Chain</div>
+                        </div>
+                        <div class="token-fullname" id="receive-token-name">Tether USD</div>
+                    </div>
+                    <i class="fas fa-chevron-down"></i>
+                </div>
+                
+                <div class="qr-section">
+                    <div class="qr-code-container">
+                        <div id="qr-code"></div>
+                        <div class="qr-overlay hidden">
+                            <i class="fas fa-spinner fa-spin"></i>
+                            <span>Generating QR Code...</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="receive-warning">
+                    Only send USDT (BEP-20) to this address.<br>
+                    Sending any other coin may result in permanent loss.
+                </div>
+                
+                <div class="address-container">
+                    <div class="address-text" id="wallet-address">0x9B3a54D092f6B4b3d2eC676cd589f124E9921E71</div>
+                    <button class="copy-button" id="copy-address">
                         <i class="fas fa-copy"></i>
                     </button>
                 </div>
-            </div>
-            
-            <div class="detail-row">
-                <span class="label">To</span>
-                <div class="value-container">
-                    <span id="explorer-to"></span>
-                    <button class="copy-button" data-copy-target="explorer-to">
-                        <i class="fas fa-copy"></i>
+                
+                <div class="receive-actions">
+                    <button class="action-button" id="share-address-btn">
+                        <i class="fas fa-share-alt"></i>
+                        <span>Share</span>
+                    </button>
+                    
+                    <button class="action-button" id="save-address-btn">
+                        <i class="fas fa-download"></i>
+                        <span>Save</span>
                     </button>
                 </div>
-            </div>
-            
-            <div class="detail-row">
-                <span class="label">Amount</span>
-                <div class="value-container">
-                    <span id="explorer-token-amount"></span>
-                    <div class="explorer-token-icon">
-                        <img src="" alt="Token">
+                
+                <div class="network-info">
+                    <div class="network-row">
+                        <span class="network-label">Network</span>
+                        <span class="network-value">BNB Smart Chain (BEP20)</span>
+                    </div>
+                    <div class="network-row">
+                        <span class="network-label">Contract Address</span>
+                        <span class="network-value contract-address">0x55d398326f99059fF775485246999027B3197955</span>
                     </div>
                 </div>
             </div>
-            
-            <div class="detail-row">
-                <span class="label">Network Fee</span>
-                <span id="explorer-fee"></span>
-            </div>
-            
-            <div class="detail-row">
-                <span class="label">Timestamp</span>
-                <span id="explorer-timestamp"></span>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Biometric Authentication Overlay -->
-<div id="biometric-overlay" class="modal">
-    <div class="modal-content biometric-content">
-        <div class="biometric-icon-container">
-            <i class="fas fa-fingerprint"></i>
-            <div class="scan-animation"></div>
-        </div>
-        
-        <div class="biometric-text">
-            <h3>Verify Identity</h3>
-            <p>Confirm transaction using fingerprint</p>
-        </div>
-        
-        <div class="transaction-preview">
-            <div class="preview-row">
-                <span class="label">Sending</span>
-                <span class="value" id="bio-amount">50,000 USDT</span>
-            </div>
-            <div class="preview-row">
-                <span class="label">To</span>
-                <span class="value" id="bio-recipient">0x1234...5678</span>
-            </div>
-            <div class="preview-row">
-                <span class="label">Network Fee</span>
-                <span class="value" id="bio-fee">0.000105 BNB</span>
-            </div>
-        </div>
-        
-        <div class="biometric-actions">
-            <button id="cancel-biometric" class="secondary-button">Cancel</button>
-            <button id="use-password" class="text-button">Use Password Instead</button>
-        </div>
-    </div>
-</div>
-
-<!-- Admin Panel -->
-<div id="admin-panel" class="modal">
-    <div class="modal-content admin-content">
-        <div class="admin-header">
-            <h3>Admin Panel</h3>
-            <span class="version-info">v3.1.0 (2025-04-05)</span>
-            <button id="close-admin" class="close-button">
-                <i class="fas fa-times"></i>
-            </button>
         </div>
 
-        <div class="admin-sections">
-            <!-- Balance Management -->
-            <div class="admin-section">
-                <h4>Balance Management</h4>
-                <div class="form-group">
-                    <label for="admin-wallet-select">Select Wallet</label>
-                    <select id="admin-wallet-select">
-                        <option value="main">Main Wallet 1</option>
-                        <option value="secondary">Main Wallet 2</option>
-                        <option value="business">Business Wallet</option>
-                    </select>
-                </div>
-                
-                <div class="form-group">
-                    <label for="admin-token-select">Select Token</label>
-                    <select id="admin-token-select">
-                        <option value="usdt">USDT</option>
-                        <option value="btc">BTC</option>
-                        <option value="eth">ETH</option>
-                        <option value="bnb">BNB</option>
-                    </select>
-                </div>
-                
-                <div class="form-group">
-                    <label for="fake-balance">Set Balance (USD)</label>
-                    <input type="number" 
-                           id="fake-balance" 
-                           placeholder="Enter amount in USD"
-                           min="0"
-                           step="0.01">
-                </div>
-                
-                <div class="form-group checkbox">
-                    <input type="checkbox" id="generate-history">
-                    <label for="generate-history">Generate Transaction History</label>
-                </div>
-                
-                <div class="form-group checkbox">
-                    <input type="checkbox" id="modify-all-wallets">
-                    <label for="modify-all-wallets">Apply to All Wallets</label>
-                </div>
-            </div>
-
-            <!-- Expiration Settings -->
-            <div class="admin-section">
-                <h4>Expiration Settings</h4>
-                <div class="form-group">
-                    <label for="expiration-time">Auto Reset After (hours)</label>
-                    <input type="number" 
-                           id="expiration-time" 
-                           value="48" 
-                           min="1" 
-                           max="168">
-                </div>
-                <div class="expiration-status">
-                    Time Remaining: <span id="expiration-countdown">Not Active</span>
-                </div>
-            </div>
-
-            <!-- Network Settings -->
-            <div class="admin-section">
-                <h4>Network Settings</h4>
-                <div class="form-group">
-                    <label for="network-speed">Transaction Speed</label>
-                    <select id="network-speed">
-                        <option value="fast">Fast (~10 sec)</option>
-                        <option value="normal">Normal (~30 sec)</option>
-                        <option value="slow">Slow (~1 min)</option>
-                    </select>
-                </div>
-                
-                <div class="form-group checkbox">
-                    <input type="checkbox" id="enable-failures">
-                    <label for="enable-failures">Enable Random Failures</label>
-                </div>
-            </div>
-
-            <!-- Debug Console -->
-            <div class="admin-section">
-                <h4>Debug Console</h4>
-                <div class="debug-console">
-                    <div id="debug-output"></div>
-                </div>
-                <div class="form-group checkbox">
-                    <input type="checkbox" id="debug-mode">
-                    <label for="debug-mode">Enable Debug Mode</label>
-                </div>
-            </div>
-        </div>
-
-        <div class="admin-actions">
-            <button id="apply-fake" class="primary-button">Apply Changes</button>
-            <button id="reset-wallet" class="secondary-button">Reset to Original</button>
-        </div>
-    </div>
-</div>
-
-<!-- Verification Overlay -->
-<div id="verification-overlay" class="modal">
-    <div class="modal-content verification-content">
-        <div class="verification-header">
-            <h3>Verify Identity</h3>
-            <div class="verification-status" id="verification-status">
-                Initializing verification...
-            </div>
-        </div>
-
-        <div class="verification-progress">
-            <div class="progress-bar">
-                <div id="progress-fill" class="progress-fill" style="width: 0%"></div>
-            </div>
-            <div class="step-indicators">
-                <div class="step active" data-step="1">
-                    <i class="fas fa-shield-alt"></i>
-                    <span>Security</span>
-                </div>
-                <div class="step" data-step="2">
-                    <i class="fas fa-link"></i>
-                    <span>Chain</span>
-                </div>
-                <div class="step" data-step="3">
-                    <i class="fas fa-check-circle"></i>
-                    <span>Complete</span>
-                </div>
-            </div>
-        </div>
-
-        <!-- Verification Result -->
-        <div id="verification-result" class="verification-result hidden">
-            <div class="result-icon">
-                <i class="fas fa-shield-check"></i>
-            </div>
-            
-            <div class="result-title">Verification Complete</div>
-            
-            <div class="result-details">
-                <div class="detail-row">
-                    <span class="label">Certificate ID</span>
-                    <span id="cert-id" class="value"></span>
-                </div>
-                <div class="detail-row">
-                    <span class="label">Timestamp</span>
-                    <span id="verify-timestamp" class="value"></span>
-                </div>
-                <div class="detail-row">
-                    <span class="label">Wallet Balance</span>
-                    <span id="verify-balance" class="value"></span>
-                </div>
-                <div class="detail-row">
-                    <span class="label">Security Status</span>
-                    <span class="value verified">
-                        <i class="fas fa-check-circle"></i>
-                        Verified
-                    </span>
-                </div>
-            </div>
-            
-            <div class="verification-actions">
-                <button id="download-cert" class="primary-button">
-                    <i class="fas fa-download"></i>
-                    Download Certificate
+        <div id="history-screen" class="screen hidden">
+            <div class="screen-header">
+                <button class="back-button">
+                    <i class="fas fa-arrow-left"></i>
                 </button>
-                <button id="close-verification" class="secondary-button">Close</button>
+                <h2>Transaction History</h2>
+                <button class="icon-button search-button">
+                    <i class="fas fa-search"></i>
+                </button>
+            </div>
+            
+            <div class="filter-options">
+                <div class="filter-tabs">
+                    <button class="filter-tab active" data-filter="all">All</button>
+                    <button class="filter-tab" data-filter="send">Sent</button>
+                    <button class="filter-tab" data-filter="receive">Received</button>
+                    <button class="filter-tab" data-filter="swap">Swaps</button>
+                </div>
+                
+                <div class="date-filter hidden">
+                    <input type="date" id="date-from" aria-label="From date">
+                    <span>to</span>
+                    <input type="date" id="date-to" aria-label="To date">
+                </div>
+            </div>
+            
+            <div class="transaction-list" id="history-transaction-list">
             </div>
         </div>
-    </div>
-</div>
 
-<!-- Transaction Template (hidden) -->
-<div class="transaction-template hidden">
-    <div class="transaction-icon">
-        <i class="fas"></i>
-    </div>
-    <div class="transaction-info">
-        <div class="transaction-type"></div>
-        <div class="transaction-date"></div>
-    </div>
-    <div class="transaction-amount">
-        <div class="transaction-value"></div>
-        <div class="transaction-usd"></div>
-    </div>
-</div>
+        <div id="tx-status-modal" class="modal">
+            <div class="modal-content">
+                <div id="tx-pending">
+                    <div class="status-icon pending">
+                        <i class="fas fa-spinner fa-spin"></i>
+                    </div>
+                    <h3>Transaction in Progress</h3>
+                    <div class="confirmation-counter">
+                        <span id="confirm-count">0</span>/3 Confirmations
+                    </div>
+                    <div class="tx-info-row">
+                        <span class="label">Transaction Hash:</span>
+                        <span id="tx-hash" class="value">0x...</span>
+                        <button class="copy-button" data-copy-target="tx-hash">
+                            <i class="fas fa-copy"></i>
+                        </button>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill"></div>
+                    </div>
+                </div>
 
-<!-- Network Error Modal -->
-<div id="network-error" class="modal">
-    <div class="modal-content error-content">
-        <div class="error-icon">
-            <i class="fas fa-exclamation-circle"></i>
+                <div id="tx-success" class="hidden">
+                    <div class="status-icon success">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                    <h3>Transaction Completed</h3>
+                    <div class="tx-details">
+                        <div class="tx-amount-row">
+                            <span class="label">Amount:</span>
+                            <span id="tx-amount" class="value">0 USDT</span>
+                        </div>
+                        <div class="tx-address-row">
+                            <span class="label">To:</span>
+                            <span id="tx-to" class="value">0x...</span>
+                            <button class="copy-button" data-copy-target="tx-to">
+                                <i class="fas fa-copy"></i>
+                            </button>
+                        </div>
+                        <div class="tx-hash-row">
+                            <span class="label">Hash:</span>
+                            <span id="tx-success-hash" class="value">0x...</span>
+                            <button class="copy-button" data-copy-target="tx-success-hash">
+                                <i class="fas fa-copy"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <button id="close-tx-success" class="primary-button">Done</button>
+                    <button id="view-on-explorer-btn" class="secondary-button">
+                        View on Explorer
+                        <i class="fas fa-external-link-alt"></i>
+                    </button>
+                </div>
+            </div>
         </div>
-        <h3>Network Error</h3>
-        <p>Unable to connect to the network. Please check your internet connection and try again.</p>
-        <button class="primary-button" onclick="window.location.reload()">Retry</button>
+
+        <div id="explorer-overlay" class="explorer-overlay">
+            <div class="explorer-header">
+                <button class="explorer-back-button">
+                    <i class="fas fa-arrow-left"></i>
+                </button>
+                <div class="explorer-title">Transaction Details</div>
+                <button class="explorer-external-link">
+                    <i class="fas fa-external-link-alt"></i>
+                </button>
+            </div>
+            
+            <div class="explorer-content">
+                <div class="explorer-status">
+                    <i class="fas fa-check-circle"></i>
+                    <span>Success</span>
+                </div>
+                
+                <div class="explorer-details">
+                    <div class="detail-row">
+                        <span class="label">Transaction Hash</span>
+                        <div class="value-container">
+                            <span id="explorer-tx-hash"></span>
+                            <button class="copy-button" data-copy-target="explorer-tx-hash">
+                                <i class="fas fa-copy"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="detail-row">
+                        <span class="label">From</span>
+                        <div class="value-container">
+                            <span id="explorer-from"></span>
+                            <button class="copy-button" data-copy-target="explorer-from">
+                                <i class="fas fa-copy"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="detail-row">
+                        <span class="label">To</span>
+                        <div class="value-container">
+                            <span id="explorer-to"></span>
+                            <button class="copy-button" data-copy-target="explorer-to">
+                                <i class="fas fa-copy"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="detail-row">
+                        <span class="label">Amount</span>
+                        <div class="value-container">
+                            <span id="explorer-token-amount"></span>
+                            <div class="explorer-token-icon">
+                                <img src="" alt="Token">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="detail-row">
+                        <span class="label">Network Fee</span>
+                        <span id="explorer-fee"></span>
+                    </div>
+                    
+                    <div class="detail-row">
+                        <span class="label">Timestamp</span>
+                        <span id="explorer-timestamp"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="biometric-overlay" class="modal">
+            <div class="modal-content biometric-content">
+                <div class="biometric-icon-container">
+                    <i class="fas fa-fingerprint"></i>
+                    <div class="scan-animation"></div>
+                </div>
+                
+                <div class="biometric-text">
+                    <h3>Verify Identity</h3>
+                    <p>Confirm transaction using fingerprint</p>
+                </div>
+                
+                <div class="transaction-preview">
+                    <div class="preview-row">
+                        <span class="label">Sending</span>
+                        <span class="value" id="bio-amount">50,000 USDT</span>
+                    </div>
+                    <div class="preview-row">
+                        <span class="label">To</span>
+                        <span class="value" id="bio-recipient">0x1234...5678</span>
+                    </div>
+                    <div class="preview-row">
+                        <span class="label">Network Fee</span>
+                        <span class="value" id="bio-fee">0.000105 BNB</span>
+                    </div>
+                </div>
+                
+                <div class="biometric-actions">
+                    <button id="cancel-biometric" class="secondary-button">Cancel</button>
+                    <button id="use-password" class="text-button">Use Password Instead</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="admin-panel" class="modal">
+            <div class="modal-content admin-content">
+                <div class="admin-header">
+                    <h3>Admin Panel</h3>
+                    <span class="version-info">v3.1.1 (2025-04-06)</span>
+                    <button id="close-admin" class="close-button">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+
+                <div class="admin-sections">
+                    <div class="admin-section">
+                        <h4>Balance Management</h4>
+                        <div class="form-group">
+                            <label for="admin-wallet-select">Select Wallet</label>
+                            <select id="admin-wallet-select">
+                                <option value="main">Main Wallet 1</option>
+                                <option value="secondary">Main Wallet 2</option>
+                                <option value="business">Business Wallet</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="admin-token-select">Select Token</label>
+                            <select id="admin-token-select">
+                                <option value="usdt">USDT</option>
+                                <option value="btc">BTC</option>
+                                <option value="eth">ETH</option>
+                                <option value="bnb">BNB</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="fake-balance">Set Balance (USD)</label>
+                            <input type="number" 
+                                   id="fake-balance" 
+                                   placeholder="Enter amount in USD"
+                                   min="0"
+                                   step="0.01">
+                        </div>
+                        
+                        <div class="form-group checkbox">
+                            <input type="checkbox" id="generate-history">
+                            <label for="generate-history">Generate Transaction History</label>
+                        </div>
+                        
+                        <div class="form-group checkbox">
+                            <input type="checkbox" id="modify-all-wallets">
+                            <label for="modify-all-wallets">Apply to All Wallets</label>
+                        </div>
+                    </div>
+
+                    <div class="admin-section">
+                        <h4>Expiration Settings</h4>
+                        <div class="form-group">
+                            <label for="expiration-time">Auto Reset After (hours)</label>
+                            <input type="number" 
+                                   id="expiration-time" 
+                                   value="48" 
+                                   min="1" 
+                                   max="168">
+                        </div>
+                        <div class="expiration-status">
+                            Time Remaining: <span id="expiration-countdown">Not Active</span>
+                        </div>
+                    </div>
+
+                    <div class="admin-section">
+                        <h4>Network Settings</h4>
+                        <div class="form-group">
+                            <label for="network-speed">Transaction Speed</label>
+                            <select id="network-speed">
+                                <option value="fast">Fast (~10 sec)</option>
+                                <option value="normal">Normal (~30 sec)</option>
+                                <option value="slow">Slow (~1 min)</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group checkbox">
+                            <input type="checkbox" id="enable-failures">
+                            <label for="enable-failures">Enable Random Failures</label>
+                        </div>
+                    </div>
+
+                    <div class="admin-section">
+                        <h4>Debug Console</h4>
+                        <div class="debug-console">
+                            <div id="debug-output"></div>
+                        </div>
+                        <div class="form-group checkbox">
+                            <input type="checkbox" id="debug-mode">
+                            <label for="debug-mode">Enable Debug Mode</label>
+                        </div>
+                    </div>
+                </div>
+
+<div class="admin-actions">
+                    <button id="apply-fake" class="primary-button">Apply Changes</button>
+                    <button id="reset-wallet" class="secondary-button">Reset to Original</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="verification-overlay" class="modal">
+            <div class="modal-content verification-content">
+                <div class="verification-header">
+                    <h3>Verify Identity</h3>
+                    <div class="verification-status" id="verification-status">
+                        Initializing verification...
+                    </div>
+                </div>
+
+                <div class="verification-progress">
+                    <div class="progress-bar">
+                        <div id="progress-fill" class="progress-fill" style="width: 0%"></div>
+                    </div>
+                    <div class="step-indicators">
+                        <div class="step active" data-step="1">
+                            <i class="fas fa-shield-alt"></i>
+                            <span>Security</span>
+                        </div>
+                        <div class="step" data-step="2">
+                            <i class="fas fa-link"></i>
+                            <span>Chain</span>
+                        </div>
+                        <div class="step" data-step="3">
+                            <i class="fas fa-check-circle"></i>
+                            <span>Complete</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="verification-result" class="verification-result hidden">
+                    <div class="result-icon">
+                        <i class="fas fa-shield-check"></i>
+                    </div>
+                    
+                    <div class="result-title">Verification Complete</div>
+                    
+                    <div class="result-details">
+                        <div class="detail-row">
+                            <span class="label">Certificate ID</span>
+                            <span id="cert-id" class="value"></span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="label">Timestamp</span>
+                            <span id="verify-timestamp" class="value"></span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="label">Wallet Balance</span>
+                            <span id="verify-balance" class="value"></span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="label">Security Status</span>
+                            <span class="value verified">
+                                <i class="fas fa-check-circle"></i>
+                                Verified
+                            </span>
+                        </div>
+                    </div>
+                    
+                    <div class="verification-actions">
+                        <button id="download-cert" class="primary-button">
+                            <i class="fas fa-download"></i>
+                            Download Certificate
+                        </button>
+                        <button id="close-verification" class="secondary-button">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="network-error" class="modal">
+            <div class="modal-content error-content">
+                <div class="error-icon">
+                    <i class="fas fa-exclamation-circle"></i>
+                </div>
+                <h3>Network Error</h3>
+                <p>Unable to connect to the network. Please check your internet connection and try again.</p>
+                <button class="primary-button" onclick="window.location.reload()">Retry</button>
+            </div>
+        </div>
+
+        <div id="loading-overlay" class="loading-overlay hidden">
+            <div class="loader">
+                <div class="spinner"></div>
+                <div class="loading-text">Loading...</div>
+            </div>
+        </div>
+
+        <div id="admin-touch-target"></div>
     </div>
-</div>
 
-<!-- Loading Overlay -->
-<div id="loading-overlay" class="loading-overlay hidden">
-    <div class="loader">
-        <div class="spinner"></div>
-        <div class="loading-text">Loading...</div>
-    </div>
-</div>
+    <div id="toast-container"></div>
 
-<!-- Touch Target for Admin Panel -->
-<div id="admin-touch-target"></div>
+    <script src="combined.js"></script>
 
-</div><!-- End of app-container -->
-
-<!-- Toast Container -->
-<div id="toast-container"></div>
-
-<!-- Scripts -->
-<script src="d.js"></script>
-<script src="combined.js"></script>
-
-<!-- Last update timestamp -->
-<!--
-    Last updated: 2025-04-05 22:37:44 UTC
-    Author: aod33333
-    Version: 3.1.0
--->
+    <script>
+        // Last update timestamp and version tracking
+        const TRUST_WALLET_VERSION = {
+            version: '3.1.1',
+            lastUpdated: '2025-04-06'
+        };
+    </script>
 </body>
 </html>
