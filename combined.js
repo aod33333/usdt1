@@ -4297,6 +4297,33 @@ function setupTokenDetailEvents(detailScreen) {
   }
 }
 
+  // Basic screen styling function for fallback
+function applyScreenStyling(screenId) {
+    const screen = document.getElementById(screenId);
+    if (!screen) return;
+    
+    // Hide all screens
+    document.querySelectorAll('.screen').forEach(s => {
+        s.classList.add('hidden');
+    });
+    
+    // Show target screen
+    screen.classList.remove('hidden');
+    
+    // Apply basic styling based on screen type
+    switch(screenId) {
+        case 'wallet-screen':
+            screen.style.backgroundColor = '#ffffff';
+            break;
+        case 'send-screen':
+        case 'receive-screen':
+        case 'history-screen':
+            // Add status bar padding
+            screen.classList.add('with-status-bar');
+            break;
+    }
+}
+
 // Document-wide error handler
 function setupGlobalErrorHandler() {
   window.addEventListener('error', function(event) {
@@ -5166,5 +5193,3 @@ setupTokenDetailActions: function(tokenId) {
   window.updateBalanceDisplay = updateBalanceDisplay;
   window.setupDefaultWalletData = setupDefaultWalletData;
 })();
-
-// Expose core functions to global scope
