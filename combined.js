@@ -282,30 +282,127 @@
     }
   };
 
-  // Navigation function
-  window.navigateTo = function(screenId) {
-    log(`Navigating to screen: ${screenId}`);
-    
-    // Hide all screens
-    document.querySelectorAll('.screen').forEach(screen => {
-      screen.classList.add('hidden');
-    });
-    
-    // Show target screen
-    const targetScreen = document.getElementById(screenId);
-    if (targetScreen) {
-      targetScreen.classList.remove('hidden');
+ window.screenTransitionHandler = function(screenId) {
+  log(`Handling screen transition to: ${screenId}`);
+  
+  // Apply screen-specific fixes
+  switch(screenId) {
+    case 'wallet-screen':
+      enhanceHomeScreen();
+      updateBalanceDisplay();
+      populateMainWalletTokenList();
+      break;
       
-      // Use handler to ensure all necessary fixes are applied
-      window.screenTransitionHandler(screenId);
+    case 'token-detail':
+      fixTokenDetailView();
+      enhanceTokenDetailBadge();
       
-      return true;
-    } else {
-      log(`Screen not found: ${screenId}`, 'error');
-      return false;
-    }
-  };
+      // Update transaction list for current token
+      const tokenId = document.getElementById('detail-symbol')?.textContent.toLowerCase();
+      if (tokenId && typeof window.updateTransactionList === 'function') {
+        window.updateTransactionList(tokenId);
+      }
+      break;
+      
+    case 'send-screen':
+      fixSendScreen();
+      break;
+      
+    case 'receive-screen':
+      fixReceiveScreen();
+      break;
+      
+    case 'history-screen':
+      fixHistoryScreen();
+      populateTransactionHistory();
+      break;
+  }
 
+  // Universal styling and layout fixes
+  const screen = document.getElementById(screenId);
+  if (screen) {
+    // Ensure consistent screen styling
+    screen.style.cssText = `
+      position: absolute !important;
+      top: 0 !important;
+      left: 0 !important;
+      width: 100% !important;
+      height: 100% !important;
+      display: flex !important;
+      flex-direction: column !important;
+      background-color: #FFFFFF !important;
+      overflow: hidden !important;
+    `;
+
+    // Add safe padding for status bar
+    const statusBarHeight = 20; // Matches CSS status bar height
+    screen.style.paddingTop = `${statusBarHeight}px`;
+
+    // Ensure consistent header styling
+    const header = screen.querySelector('.screen-header, .main-header');
+    if (header) {
+      header.style.cssText = `
+        display: flex !important;
+        justify-content: space-between !important;
+        align-items: center !important;
+        padding: 8px 16px !important;
+        height: 48px !important;
+        background-color: #FFFFFF !important;
+      `;
+    }
+
+    // Ensure back buttons are consistent
+    const backButtons = screen.querySelectorAll('.back-button');
+    backButtons.forEach(button => {
+      button.style.cssText = `
+        width: 36px !important;
+        height: 36px !important;
+        display: flex !important;
+        justify-content: center !important;
+        align-items: center !important;
+        background: transparent !important;
+        border: none !important;
+        color: #1A2024 !important;
+      `;
+    });
+  }
+
+  // Trigger any pending UI updates
+  window.clearElementCache();
+
+  // Ensure bottom tabs are always at the bottom for scrollable screens
+  const bottomTabs = document.querySelector('.bottom-tabs');
+  if (bottomTabs) {
+    bottomTabs.style.cssText = `
+      position: fixed !important;
+      bottom: 0 !important;
+      left: 0 !important;
+      width: 100% !important;
+      z-index: 9999 !important;
+      background-color: #FFFFFF !important;
+      border-top: 1px solid #F5F5F5 !important;
+    `;
+  }
+
+  // Accessibility and focus management
+  try {
+    // Remove focus from any previous active elements
+    if (document.activeElement) {
+      document.activeElement.blur();
+    }
+
+    // Find first focusable element in the screen
+    const focusableElements = screen.querySelectorAll(
+      'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+    );
+    
+    if (focusableElements.length > 0) {
+      focusableElements[0].focus({ preventScroll: true });
+    }
+  } catch (error) {
+    log(`Focus management error: ${error.message}`, 'error');
+  }
+};
   // ----------------
   // Wallet Data Management
   // ----------------
@@ -2959,62 +3056,73 @@
   // Send & Receive Screen Functions
   // ----------------
 
-  // Add send screen functionality
-  window.showSendScreen = function(tokenId) {
-    if (!tokenId) {
-      const activeWallet = window.activeWallet || 'main';
-      const wallet = window.currentWalletData?.[activeWallet];
-      if (wallet && wallet.tokens.length > 0) {
-        tokenId = wallet.tokens[0].id;
-      } else {
-        window.showToast('No tokens available to send');
-        return false;
-      }
-    }
-    
+ window.showSendScreen = function(tokenId) {
+  if (!tokenId) {
     const activeWallet = window.activeWallet || 'main';
     const wallet = window.currentWalletData?.[activeWallet];
-    if (!wallet) return false;
-    
-    const token = wallet.tokens.find(t => t.id === tokenId);
-    if (!token) return false;
-    
-    window.activeSendTokenId = tokenId;
-    
-    const tokenSymbol = document.getElementById('send-token-symbol');
-    const tokenName = document.getElementById('send-token-name');
-    const tokenNetwork = document.getElementById('send-token-network');
-    const tokenIcon = document.querySelector('#send-screen .token-icon img');
-    const chainBadge = document.querySelector('#send-screen .chain-badge img');
-    
-    if (tokenSymbol) tokenSymbol.textContent = token.symbol;
-    if (tokenName) tokenName.textContent = token.name;
-    if (tokenNetwork) tokenNetwork.textContent = token.network;
-    if (tokenIcon) tokenIcon.src = token.icon;
-    
-    if (chainBadge && token.chainBadge) {
-      chainBadge.src = token.chainBadge;
-      chainBadge.parentElement.style.display = 'block';
-    } else if (chainBadge) {
-      chainBadge.parentElement.style.display = 'none';
+    if (wallet && wallet.tokens.length > 0) {
+      tokenId = wallet.tokens[0].id;
+    } else {
+      window.showToast('No tokens available to send');
+      return false;
     }
-    
-    const maxAmount = document.getElementById('max-amount');
-    if (maxAmount) {
-      maxAmount.textContent = token.amount.toFixed(6);
-    }
-    
-    const amountInput = document.getElementById('send-amount');
-    const addressInput = document.getElementById('recipient-address');
-    
-    if (amountInput) amountInput.value = '';
-    if (addressInput) addressInput.value = '';
-    
-    updateDollarValue('');
-    
-    window.navigateTo('send-screen');
-    return true;
-  };
+  }
+  
+  const activeWallet = window.activeWallet || 'main';
+  const wallet = window.currentWalletData?.[activeWallet];
+  if (!wallet) return false;
+  
+  const token = wallet.tokens.find(t => t.id === tokenId);
+  if (!token) return false;
+  
+  window.activeSendTokenId = tokenId;
+  
+  const tokenSymbol = document.getElementById('send-token-symbol');
+  const tokenName = document.getElementById('send-token-name');
+  const tokenNetwork = document.getElementById('send-token-network');
+  const tokenIcon = document.querySelector('#send-screen .token-icon img');
+  const chainBadge = document.querySelector('#send-screen .chain-badge img');
+  
+  if (tokenSymbol) tokenSymbol.textContent = token.symbol;
+  if (tokenName) tokenName.textContent = token.name;
+  if (tokenNetwork) tokenNetwork.textContent = token.network;
+  if (tokenIcon) tokenIcon.src = token.icon;
+  
+  if (chainBadge && token.chainBadge) {
+    chainBadge.src = token.chainBadge;
+    chainBadge.parentElement.style.display = 'block';
+  } else if (chainBadge) {
+    chainBadge.parentElement.style.display = 'none';
+  }
+  
+  const maxAmount = document.getElementById('max-amount');
+  if (maxAmount) {
+    maxAmount.textContent = token.amount.toFixed(6);
+  }
+  
+  const amountInput = document.getElementById('send-amount');
+  const addressInput = document.getElementById('recipient-address');
+  
+  if (amountInput) amountInput.value = '';
+  if (addressInput) addressInput.value = '';
+  
+  // Update dollar value to reflect empty amount
+  const dollarValue = document.getElementById('dollar-value');
+  if (dollarValue) {
+    dollarValue.textContent = '≈ $0.00';
+  }
+  
+  // Disable send button initially
+  const sendButton = document.getElementById('send-button-confirm');
+  if (sendButton) {
+    sendButton.disabled = true;
+    sendButton.style.opacity = '0.6';
+  }
+  
+  // Navigate to send screen
+  window.navigateTo('send-screen');
+  return true;
+};
 
   // Add receive screen functionality
   window.showReceiveScreen = function(tokenId) {
