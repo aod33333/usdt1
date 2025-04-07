@@ -244,44 +244,6 @@
   // Screen Transitions and Navigation Handlers
   // ----------------
 
-  // Screen transition handler
-  window.screenTransitionHandler = function(screenId) {
-    log(`Handling screen transition to: ${screenId}`);
-    
-    // Apply screen-specific fixes
-    switch(screenId) {
-      case 'wallet-screen':
-        enhanceHomeScreen();
-        updateBalanceDisplay();
-        populateMainWalletTokenList();
-        break;
-        
-      case 'token-detail':
-        fixTokenDetailView();
-        enhanceTokenDetailBadge();
-        
-        // Update transaction list for current token
-        const tokenId = document.getElementById('detail-symbol')?.textContent.toLowerCase();
-        if (tokenId && typeof window.updateTransactionList === 'function') {
-          window.updateTransactionList(tokenId);
-        }
-        break;
-        
-      case 'send-screen':
-        fixSendScreen();
-        break;
-        
-      case 'receive-screen':
-        fixReceiveScreen();
-        break;
-        
-      case 'history-screen':
-        fixHistoryScreen();
-        populateTransactionHistory();
-        break;
-    }
-  };
-
  window.screenTransitionHandler = function(screenId) {
   log(`Handling screen transition to: ${screenId}`);
   
@@ -673,39 +635,7 @@
   
   window.setupDefaultWalletData = setupDefaultWalletData;
 
-  // Helper function to deep clone wallet data
-  function deepCloneWallet(wallet) {
-    if (!wallet) return null;
-    
-    const newWallet = Object.create(null);
-    newWallet.totalBalance = wallet.totalBalance;
-    newWallet.tokens = wallet.tokens.map(token => ({
-      id: token.id,
-      name: token.name,
-      symbol: token.symbol,
-      network: token.network,
-      icon: token.icon,
-      amount: token.amount,
-      value: token.value,
-      price: token.price,
-      change: token.change,
-      chainBadge: token.chainBadge
-    }));
-    
-    return newWallet;
-  }
-
-  function deepCloneAllWallets(wallets) {
-    if (!wallets) return null;
-    
-    const newWallets = Object.create(null);
-    for (const [walletId, wallet] of Object.entries(wallets)) {
-      newWallets[walletId] = deepCloneWallet(wallet);
-    }
-    
-    return newWallets;
-  }
-
+  
   // Update wallet balance display
   function updateBalanceDisplay() {
     const totalBalanceElement = document.getElementById('total-balance');
@@ -1187,17 +1117,6 @@
     applyBadgeStyling(badge);
     
     return badge;
-  }
-
-  function updateNetworkBadge(badge, tokenId, badgeUrl, network) {
-    const badgeImg = badge.querySelector('img');
-    if (badgeImg) {
-      badgeImg.src = badgeUrl;
-      badgeImg.alt = network || (tokenId.toUpperCase() + ' Network');
-    }
-    
-    // Ensure proper styling
-    applyBadgeStyling(badge);
   }
 
   function applyBadgeStyling(badge) {
@@ -2230,13 +2149,6 @@
     dollarValue.textContent = '≈ ' + (isNaN(value) ? '$0.00' : formatCurrency(value));
   }
 
-  function formatCurrency(amount) {
-    if (window.FormatUtils && typeof window.FormatUtils.formatCurrency === 'function') {
-      return window.FormatUtils.formatCurrency(amount);
-    }
-    return '$' + amount.toFixed(2);
-  }
-
   // ----------------
   // Receive Screen Management
   // ----------------
@@ -2679,29 +2591,62 @@
   window.populateTransactionHistory = populateTransactionHistory;
 
   function updateTransactionList(tokenId) {
-    const transactionList = document.getElementById('transaction-list');
-    if (!transactionList) return;
-    
-    // Clear existing content
-    while (transactionList.firstChild) {
-      if (!transactionList.firstChild.classList || !transactionList.firstChild.classList.contains('transaction-template')) {
-        transactionList.removeChild(transactionList.firstChild);
-      }
-    }
-    
-    const activeWallet = window.activeWallet || 'main';
-    const transactions = window.currentTransactions?.[activeWallet]?.[tokenId] || [];
-    
-    if (transactions.length === 0) {
-      showEmptyTransactionState(transactionList);
-      return;
-    }
-    
-    hideEmptyTransactionState();
-    renderDetailTransactions(transactionList, transactions);
+  const transactionList = document.getElementById('transaction-list');
+  if (!transactionList) return;
+  
+  // Clear existing content
+  transactionList.innerHTML = '';
+  
+  const activeWallet = window.activeWallet || 'main';
+  const transactions = window.currentTransactions?.[activeWallet]?.[tokenId] || [];
+  
+  if (transactions.length === 0) {
+    showEmptyTransactionState(transactionList);
+    return;
   }
-
-  window.updateTransactionList = updateTransactionList;
+  
+  // Use similar rendering logic from populateTransactionHistory
+  transactions.forEach(tx => {
+    const txItem = document.createElement('div');
+    txItem.className = `transaction-item transaction-${tx.type}`;
+    
+    // Format values similar to populateTransactionHistory
+    const formattedAmount = tx.amount.toFixed(6);
+    const formattedValue = formatCurrency(tx.value);
+    
+    txItem.innerHTML = `
+      <div class="transaction-icon">
+        <i class="fas fa-${tx.type === 'receive' ? 'arrow-down' : 'arrow-up'}"></i>
+      </div>
+      <div class="transaction-info">
+        <div class="transaction-type">${tx.type === 'receive' ? 'Received' : 'Sent'} ${tx.symbol}</div>
+        <div class="transaction-date">${tx.date}</div>
+      </div>
+      <div class="transaction-amount">
+        <div class="transaction-value ${tx.type === 'receive' ? 'positive' : 'negative'}">
+          ${tx.type === 'receive' ? '+' : '-'}${formattedAmount} ${tx.symbol}
+        </div>
+        <div class="transaction-usd">${formattedValue}</div>
+      </div>
+    `;
+    
+    // Apply stylings
+    txItem.style.cssText = `
+      display: flex !important;
+      align-items: center !important;
+      padding: 16px !important;
+      border-bottom: 1px solid #F5F5F5 !important;
+      cursor: pointer !important;
+    `;
+    
+    // Add click handler
+    txItem.addEventListener('click', function() {
+      showTransactionDetails(tx);
+    });
+    
+    transactionList.appendChild(txItem);
+  });
+}
 
   function showEmptyTransactionState(container) {
     container.innerHTML = `
