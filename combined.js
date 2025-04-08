@@ -1066,9 +1066,13 @@ function enhanceNetworkBadges() {
             badge = createNetworkBadge(token.id, token.chainBadge, token.network);
             tokenIcon.appendChild(badge);
         } else {
-            // Update existing badge instead of calling updateNetworkBadge
-            badge.querySelector('img').src = token.chainBadge;
-            badge.querySelector('img').alt = token.network || (token.id.toUpperCase() + ' Network');
+            // Instead of calling updateNetworkBadge (which doesn't exist),
+            // update the badge directly:
+            const badgeImg = badge.querySelector('img');
+            if (badgeImg) {
+                badgeImg.src = token.chainBadge;
+                badgeImg.alt = token.network || (token.id.toUpperCase() + ' Network');
+            }
             applyBadgeStyling(badge);
         }
     });
