@@ -1038,42 +1038,44 @@
     enhanceTokenActions();
   }
 
-  // Fix network badges
-  function enhanceNetworkBadges() {
+function enhanceNetworkBadges() {
     log('Enhancing network badges');
     
     // Define which tokens should have network badges based on their chainBadge property
     const tokenItems = document.querySelectorAll('.token-item');
     
     tokenItems.forEach(item => {
-      const tokenId = item.getAttribute('data-token-id');
-      if (!tokenId) return;
-      
-      const activeWallet = window.activeWallet || 'main';
-      const wallet = window.currentWalletData && window.currentWalletData[activeWallet];
-      if (!wallet || !wallet.tokens) return;
-      
-      const token = wallet.tokens.find(t => t.id === tokenId);
-      if (!token || !token.chainBadge) return;
-      
-      const tokenIcon = item.querySelector('.token-icon');
-      if (!tokenIcon) return;
-      
-      // Check if badge already exists
-      let badge = tokenIcon.querySelector('.chain-badge');
-      
-      // Create or update badge
-      if (!badge) {
-        badge = createNetworkBadge(token.id, token.chainBadge, token.network);
-        tokenIcon.appendChild(badge);
-      } else {
-        updateNetworkBadge(badge, token.id, token.chainBadge, token.network);
-      }
+        const tokenId = item.getAttribute('data-token-id');
+        if (!tokenId) return;
+        
+        const activeWallet = window.activeWallet || 'main';
+        const wallet = window.currentWalletData && window.currentWalletData[activeWallet];
+        if (!wallet || !wallet.tokens) return;
+        
+        const token = wallet.tokens.find(t => t.id === tokenId);
+        if (!token || !token.chainBadge) return;
+        
+        const tokenIcon = item.querySelector('.token-icon');
+        if (!tokenIcon) return;
+        
+        // Check if badge already exists
+        let badge = tokenIcon.querySelector('.chain-badge');
+        
+        // Create or update badge
+        if (!badge) {
+            badge = createNetworkBadge(token.id, token.chainBadge, token.network);
+            tokenIcon.appendChild(badge);
+        } else {
+            // Update existing badge instead of calling updateNetworkBadge
+            badge.querySelector('img').src = token.chainBadge;
+            badge.querySelector('img').alt = token.network || (token.id.toUpperCase() + ' Network');
+            applyBadgeStyling(badge);
+        }
     });
     
     // Add network badge to token detail icon if appropriate
     enhanceTokenDetailBadge();
-  }
+}
 
   function enhanceTokenDetailBadge() {
     const tokenDetailIcon = document.querySelector('.token-detail-icon-container');
