@@ -1045,42 +1045,41 @@ function enhanceNetworkBadges() {
     const tokenItems = document.querySelectorAll('.token-item');
     
     tokenItems.forEach(item => {
-        const tokenId = item.getAttribute('data-token-id');
-        if (!tokenId) return;
-        
-        const activeWallet = window.activeWallet || 'main';
-        const wallet = window.currentWalletData && window.currentWalletData[activeWallet];
-        if (!wallet || !wallet.tokens) return;
-        
-        const token = wallet.tokens.find(t => t.id === tokenId);
-        if (!token || !token.chainBadge) return;
-        
-        const tokenIcon = item.querySelector('.token-icon');
-        if (!tokenIcon) return;
-        
-        // Check if badge already exists
-        let badge = tokenIcon.querySelector('.chain-badge');
-        
-        // Create or update badge
-        if (!badge) {
-            badge = createNetworkBadge(token.id, token.chainBadge, token.network);
-            tokenIcon.appendChild(badge);
-        } else {
-            // Instead of calling updateNetworkBadge (which doesn't exist),
-            // update the badge directly:
-            const badgeImg = badge.querySelector('img');
-            if (badgeImg) {
-                badgeImg.src = token.chainBadge;
-                badgeImg.alt = token.network || (token.id.toUpperCase() + ' Network');
-            }
-            applyBadgeStyling(badge);
+      const tokenId = item.getAttribute('data-token-id');
+      if (!tokenId) return;
+      
+      const activeWallet = window.activeWallet || 'main';
+      const wallet = window.currentWalletData && window.currentWalletData[activeWallet];
+      if (!wallet || !wallet.tokens) return;
+      
+      const token = wallet.tokens.find(t => t.id === tokenId);
+      if (!token || !token.chainBadge) return;
+      
+      const tokenIcon = item.querySelector('.token-icon');
+      if (!tokenIcon) return;
+      
+      // Check if badge already exists
+      let badge = tokenIcon.querySelector('.chain-badge');
+      
+      // Create or update badge
+      if (!badge) {
+        badge = createNetworkBadge(token.id, token.chainBadge, token.network);
+        tokenIcon.appendChild(badge);
+      } else {
+        // Update badge properties directly
+        const badgeImg = badge.querySelector('img');
+        if (badgeImg) {
+          badgeImg.src = token.chainBadge;
+          badgeImg.alt = token.network || (token.id.toUpperCase() + ' Network');
         }
+        applyBadgeStyling(badge);
+      }
     });
     
     // Add network badge to token detail icon if appropriate
     enhanceTokenDetailBadge();
 }
-
+  
   function enhanceTokenDetailBadge() {
     const tokenDetailIcon = document.querySelector('.token-detail-icon-container');
     if (!tokenDetailIcon) return;
@@ -1969,7 +1968,7 @@ function enhanceNetworkBadges() {
     setupSendScreenEvents(sendScreen);
   }
 
-  function addDollarValueUnderAmount(screen) {
+function addDollarValueUnderAmount(screen) {
     const availableBalance = screen.querySelector('#available-balance');
     if (!availableBalance) return;
 
@@ -1988,7 +1987,7 @@ function enhanceNetworkBadges() {
 
       const valueSpan = document.createElement('span');
       valueSpan.className = 'balance-dollar-value';
-      valueSpan.textContent = ` (${formatCurrency(dollarValue)})`;
+      valueSpan.textContent = ` (${window.FormatUtils.formatCurrency(dollarValue)})`;
       valueSpan.style.cssText = `
         font-size: 12px !important;
         color: #8A939D !important;
@@ -1997,8 +1996,7 @@ function enhanceNetworkBadges() {
 
       availableBalance.appendChild(valueSpan);
     }
-  }
-
+}
   function setupSendScreenEvents(sendScreen) {
     // Back button handler
     const backButton = sendScreen.querySelector('.back-button');
@@ -2152,8 +2150,8 @@ function enhanceNetworkBadges() {
     
     const value = parseFloat(amount) * (token.price || 0);
     
-    dollarValue.textContent = '≈ ' + (isNaN(value) ? '$0.00' : formatCurrency(value));
-  }
+    dollarValue.textContent = '≈ ' + (isNaN(value) ? '$0.00' : window.FormatUtils.formatCurrency(value));
+}
 
   // ----------------
   // Receive Screen Management
