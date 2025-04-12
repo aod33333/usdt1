@@ -3973,19 +3973,16 @@ function recoverFromLoadingIssues() {
     } catch (e) {
         console.error('Recovery failed:', e);
     }
-}
- function initFixes() {
+function initFixes() {
     log(`Initializing Trust Wallet UI Patch v${CONFIG.version}`);
     
-    // Only start if document is fully loaded
     if (document.readyState === 'complete' || document.readyState === 'interactive') {
-        setTimeout(startPatching, CONFIG.initDelay);
+        startPatching(); // Remove setTimeout
     } else {
-        document.addEventListener('DOMContentLoaded', () => {
-            setTimeout(startPatching, CONFIG.initDelay);
-        });
+        document.addEventListener('DOMContentLoaded', startPatching); // Remove setTimeout
     }
 }
+  
  // Start patching process
 function startPatching() {
     try {
