@@ -1,7 +1,4 @@
-
-
-
-  // ----------------
+// ----------------
   // Authentication & Admin
   // ----------------
 
@@ -22,42 +19,40 @@ function initPasscodeHandling() {
         window.correctPasscode = '123456';
     }
     
+    // Find dots before using them
+    const dots = document.querySelectorAll('.passcode-dots .dot');
+    
     // Make sure to only add event listeners once
     if (!window.passcodInitialized) {
         const numpadKeys = document.querySelectorAll('.numpad-key');
         numpadKeys.forEach(key => {
-            key.addEventListener('click', handleNumpadKey);
+            key.addEventListener('click', function() {
+                const keyValue = this.getAttribute('data-key');
+                
+                if (keyValue === 'back') {
+                    if (window.passcodeEntered.length > 0) {
+                        window.passcodeEntered = window.passcodeEntered.slice(0, -1);
+                        updateDotsUI();
+                    }
+                } else if (keyValue === 'bio') {
+                    unlockWallet();
+                } else {
+                    if (window.passcodeEntered.length < 6) {
+                        window.passcodeEntered += keyValue;
+                        updateDotsUI();
+                        
+                        if (window.passcodeEntered.length === 6) {
+                            setTimeout(validatePasscode, 300);
+                        }
+                    }
+                }
+            });
         });
         window.passcodInitialized = true;
     }
-}
-
-function handleNumpadKey() {
-    const keyValue = this.getAttribute('data-key');
-    
-    if (keyValue === 'back') {
-        if (window.passcodeEntered.length > 0) {
-            window.passcodeEntered = window.passcodeEntered.slice(0, -1);
-            updateDots();
-        }
-    } else if (keyValue === 'bio') {
-        window.passcodeEntered = window.correctPasscode;
-        updateDots();
-        setTimeout(validatePasscode, 300);
-    } else {
-        if (window.passcodeEntered.length < 6) {
-            window.passcodeEntered += keyValue;
-            updateDots();
-            
-            if (window.passcodeEntered.length === 6) {
-                setTimeout(validatePasscode, 300);
-            }
-        }
-    }
-}
     
     // Detailed function definitions with error handling
-    function updateDots() {
+    function updateDotsUI() {
         try {
             dots.forEach((dot, index) => {
                 if (index < window.passcodeEntered.length) {
@@ -85,15 +80,21 @@ function handleNumpadKey() {
                 
                 setTimeout(() => {
                     window.passcodeEntered = '';
-                    updateDots();
+                    updateDotsUI();
                     dotsContainer.classList.remove('shake');
                 }, 500);
 
-                window.showToast('Invalid passcode. Try again.', 1500);
+                if (typeof window.showToast === 'function') {
+                    window.showToast('Invalid passcode. Try again.', 1500);
+                } else {
+                    console.log('Invalid passcode. Try again.');
+                }
             }
         } catch (error) {
             console.error('Passcode validation error:', error);
-            window.showToast('Validation failed');
+            if (typeof window.showToast === 'function') {
+                window.showToast('Validation failed');
+            }
         }
     }
     
@@ -113,29 +114,49 @@ function handleNumpadKey() {
                 if (typeof window.populateMainWalletTokenList === 'function') {
                     window.populateMainWalletTokenList();
                 }
+                
+                // Trigger screen transition
+                if (typeof window.screenTransitionHandler === 'function') {
+                    window.screenTransitionHandler('wallet-screen');
+                }
             }
         } catch (error) {
             console.error('Unlock wallet error:', error);
-            window.showToast('Unlock failed');
+            if (typeof window.showToast === 'function') {
+                window.showToast('Unlock failed');
+            }
         }
     }
 }
 
-  // Demo balance setup function
-  window.setupDemoBalance = function() {
-    log('Setting up demo balance');
+// Ensure the function is globally available
+window.initPasscodeHandling = initPasscodeHandling;
+
+// Demo balance setup function
+window.setupDemoBalance = function() {
+    if (typeof log === 'function') {
+        log('Setting up demo balance');
+    } else {
+        console.log('Setting up demo balance');
+    }
     
     // Make sure wallet data is initialized
     if (!window.currentWalletData) {
-      setupDefaultWalletData();
+        if (typeof window.setupDefaultWalletData === 'function') {
+            window.setupDefaultWalletData();
+        }
     }
     
     // Update total balance display
-    updateBalanceDisplay();
+    if (typeof window.updateBalanceDisplay === 'function') {
+        window.updateBalanceDisplay();
+    }
     
     // Populate token list
-    populateMainWalletTokenList();
-  };
+    if (typeof window.populateMainWalletTokenList === 'function') {
+        window.populateMainWalletTokenList();
+    }
+};
 
   // ----------------
   // Send & Receive Screen Functions
@@ -205,7 +226,19 @@ function handleNumpadKey() {
   }
   
   // Navigate to send screen
-  window.navigateTo('send-screen');
+  if (typeof window.navigateTo === 'function') {
+    window.navigateTo('send-screen');
+  } else {
+    // Fallback navigation
+    const screens = document.querySelectorAll('.screen');
+    screens.forEach(screen => {
+      if (screen.id === 'send-screen') {
+        screen.classList.remove('hidden');
+      } else {
+        screen.classList.add('hidden');
+      }
+    });
+  }
   return true;
 };
 
@@ -255,7 +288,19 @@ function handleNumpadKey() {
     }
     
     // Navigate to receive screen
-    window.navigateTo('receive-screen');
+    if (typeof window.navigateTo === 'function') {
+      window.navigateTo('receive-screen');
+    } else {
+      // Fallback navigation
+      const screens = document.querySelectorAll('.screen');
+      screens.forEach(screen => {
+        if (screen.id === 'receive-screen') {
+          screen.classList.remove('hidden');
+        } else {
+          screen.classList.add('hidden');
+        }
+      });
+    }
     return true;
   };
 
@@ -285,7 +330,13 @@ function handleNumpadKey() {
     }
     
     if (balanceValue) {
-      balanceValue.textContent = formatCurrency(token.value);
+      if (typeof window.formatCurrency === 'function') {
+        balanceValue.textContent = window.formatCurrency(token.value);
+      } else if (typeof window.FormatUtils?.formatCurrency === 'function') {
+        balanceValue.textContent = window.FormatUtils.formatCurrency(token.value);
+      } else {
+        balanceValue.textContent = '$' + token.value.toFixed(2);
+      }
     }
     
     // Update price info
@@ -293,7 +344,13 @@ function handleNumpadKey() {
     const priceChange = document.getElementById('token-price-change');
     
     if (currentPrice) {
-      currentPrice.textContent = formatCurrency(token.price);
+      if (typeof window.formatCurrency === 'function') {
+        currentPrice.textContent = window.formatCurrency(token.price);
+      } else if (typeof window.FormatUtils?.formatCurrency === 'function') {
+        currentPrice.textContent = window.FormatUtils.formatCurrency(token.price);
+      } else {
+        currentPrice.textContent = '$' + token.price.toFixed(2);
+      }
     }
     
     if (priceChange) {
@@ -302,7 +359,9 @@ function handleNumpadKey() {
     }
     
     // Update network badge
-    enhanceTokenDetailBadge();
+    if (typeof window.enhanceTokenDetailBadge === 'function') {
+      window.enhanceTokenDetailBadge();
+    }
     
     // Clear and update transaction list
     if (typeof window.updateTransactionList === 'function') {
@@ -310,10 +369,24 @@ function handleNumpadKey() {
     }
     
     // Show staking option if available
-    fixStakingBanner();
+    if (typeof window.fixStakingBanner === 'function') {
+      window.fixStakingBanner();
+    }
     
     // Navigate to token detail screen
-    window.navigateTo('token-detail');
+    if (typeof window.navigateTo === 'function') {
+      window.navigateTo('token-detail');
+    } else {
+      // Fallback navigation
+      const screens = document.querySelectorAll('.screen');
+      screens.forEach(screen => {
+        if (screen.id === 'token-detail') {
+          screen.classList.remove('hidden');
+        } else {
+          screen.classList.add('hidden');
+        }
+      });
+    }
     return true;
   };
 
@@ -330,7 +403,11 @@ function handleNumpadKey() {
 
   // Fix #9: Admin Panel Comprehensive Fix
   function fixAdminPanel() {
-    log('Fixing admin panel');
+    if (typeof log === 'function') {
+      log('Fixing admin panel');
+    } else {
+      console.log('Fixing admin panel');
+    }
     
     const adminPanel = document.getElementById('admin-panel');
     if (!adminPanel) return;
@@ -375,10 +452,14 @@ function handleNumpadKey() {
         applyBalanceChanges(formData);
         
         // Show success message
-        showToast('Balance updated successfully');
+        if (typeof window.showToast === 'function') {
+          window.showToast('Balance updated successfully');
+        }
       } catch (error) {
-        log(`Admin panel error: ${error.message}`, 'error');
-        showToast('Failed to update balance');
+        console.error(`Admin panel error: ${error.message}`);
+        if (typeof window.showToast === 'function') {
+          window.showToast('Failed to update balance');
+        }
       }
     });
   }
@@ -408,7 +489,9 @@ function handleNumpadKey() {
 
   function validateFormData(formData) {
     if (isNaN(formData.fakeBalance) || formData.fakeBalance < 0) {
-      showToast('Please enter a valid balance amount');
+      if (typeof window.showToast === 'function') {
+        window.showToast('Please enter a valid balance amount');
+      }
       return false;
     }
     return true;
@@ -468,7 +551,7 @@ function handleNumpadKey() {
       updateUIAfterBalanceChange(walletId);
 
     } catch (error) {
-      log(`Failed to update wallet balance: ${error.message}`, 'error');
+      console.error(`Failed to update wallet balance: ${error.message}`);
       throw error;
     }
   }
@@ -485,7 +568,9 @@ function handleNumpadKey() {
     // Set up timer
     window.balanceExpirationTimer = setTimeout(() => {
       resetAllWallets();
-      showToast('Fake balances have expired and been reset');
+      if (typeof window.showToast === 'function') {
+        window.showToast('Fake balances have expired and been reset');
+      }
     }, hours * 60 * 60 * 1000);
     
     // Update UI to show countdown
@@ -592,21 +677,26 @@ function handleNumpadKey() {
     try {
       // Reset wallet data using direct object cloning
       if (window.originalWalletData?.[walletId]) {
-        window.currentWalletData[walletId] = deepCloneWallet(window.originalWalletData[walletId]);
+        // Simple deep clone
+        window.currentWalletData[walletId] = JSON.parse(JSON.stringify(window.originalWalletData[walletId]));
       }
 
       // Reset transactions
       if (window.currentTransactions?.[walletId]) {
-        window.currentTransactions[walletId] = Object.create(null); // Create clean empty object
+        window.currentTransactions[walletId] = {}; 
       }
 
       // Update UI
       updateUIAfterBalanceChange(walletId);
 
-      showToast(`${walletId} wallet reset to original state`);
+      if (typeof window.showToast === 'function') {
+        window.showToast(`${walletId} wallet reset to original state`);
+      }
     } catch (error) {
-      log(`Failed to reset wallet: ${error.message}`, 'error');
-      showToast('Failed to reset wallet');
+      console.error(`Failed to reset wallet: ${error.message}`);
+      if (typeof window.showToast === 'function') {
+        window.showToast('Failed to reset wallet');
+      }
     }
   }
 
@@ -614,11 +704,11 @@ function handleNumpadKey() {
     try {
       // Reset all wallet data using direct object cloning
       if (window.originalWalletData) {
-        window.currentWalletData = deepCloneAllWallets(window.originalWalletData);
+        window.currentWalletData = JSON.parse(JSON.stringify(window.originalWalletData));
       }
 
       // Reset all transactions with a clean object
-      window.currentTransactions = Object.create(null);
+      window.currentTransactions = {};
 
       // Reset expiration countdown
       const countdownElement = document.getElementById('expiration-countdown');
@@ -640,7 +730,7 @@ function handleNumpadKey() {
       updateUIAfterBalanceChange(window.activeWallet || 'main');
 
     } catch (error) {
-      log(`Failed to reset all wallets: ${error.message}`, 'error');
+      console.error(`Failed to reset all wallets: ${error.message}`);
     }
   }
 
@@ -699,7 +789,11 @@ function handleNumpadKey() {
   }
 
   function setupAdminPanelActivation() {
-    log('Setting up admin panel access');
+    if (typeof log === 'function') {
+      log('Setting up admin panel access');
+    } else {
+      console.log('Setting up admin panel access');
+    }
     
     // Create hidden touch target if it doesn't exist
     if (!document.getElementById('admin-touch-target')) {
@@ -707,7 +801,7 @@ function handleNumpadKey() {
       touchTarget.id = 'admin-touch-target';
       touchTarget.style.cssText = `
         position: fixed;
-        top: 25px;
+        top: a25px;
         right: 0;
         width: 60px;
         height: 60px;
@@ -832,7 +926,9 @@ function handleNumpadKey() {
     }
     
     if (balanceValue) {
-      balanceValue.textContent = formatCurrency(token.value);
+      balanceValue.textContent = window.formatCurrency ? 
+        window.formatCurrency(token.value) : 
+        '$' + token.value.toFixed(2);
     }
     
     // Update price info
@@ -840,7 +936,9 @@ function handleNumpadKey() {
     const priceChange = document.getElementById('token-price-change');
     
     if (currentPrice) {
-      currentPrice.textContent = formatCurrency(token.price);
+      currentPrice.textContent = window.formatCurrency ? 
+        window.formatCurrency(token.price) : 
+        '$' + token.price.toFixed(2);
     }
     
     if (priceChange) {
@@ -849,14 +947,18 @@ function handleNumpadKey() {
     }
     
     // Update transaction list
-    window.updateTransactionList?.(tokenId);
+    if (typeof window.updateTransactionList === 'function') {
+      window.updateTransactionList(tokenId);
+    }
   }
 
   function updateTransactionHistory() {
     // Update transaction history if visible
     const historyScreen = document.getElementById('history-screen');
     if (historyScreen && getComputedStyle(historyScreen).display !== 'none') {
-      window.populateTransactionHistory?.();
+      if (typeof window.populateTransactionHistory === 'function') {
+        window.populateTransactionHistory();
+      }
     }
   }
 
@@ -866,137 +968,111 @@ function handleNumpadKey() {
 
   // Apply all core fixes in the correct order
   function applyCoreFixes() {
-    log('Applying core fixes');
+    if (typeof log === 'function') {
+      log('Applying core fixes');
+    } else {
+      console.log('Applying core fixes');
+    }
     
     try {
       // Fix network-related functionality
-      enhanceNetworkBadges();
-      fixNetworkSelection();
+      if (typeof window.enhanceNetworkBadges === 'function') {
+        window.enhanceNetworkBadges();
+      }
+      
+      if (typeof window.fixNetworkSelection === 'function') {
+        window.fixNetworkSelection();
+      }
       
       // Fix main screens
-      enhanceHomeScreen();
-      fixTokenDetailView();
-      fixSendScreen();
-      fixReceiveScreen();
-      fixHistoryScreen();
+      if (typeof window.enhanceHomeScreen === 'function') {
+        window.enhanceHomeScreen();
+      }
       
-      // Fix transaction history
-      fixTransactionHistory();
+      if (typeof window.fixTokenDetailView === 'function') {
+        window.fixTokenDetailView();
+      }
+      
+      if (typeof window.fixSendScreen === 'function') {
+        window.fixSendScreen();
+      }
+      
+      if (typeof window.fixReceiveScreen === 'function') {
+        window.fixReceiveScreen();
+      }
+      
+      if (typeof window.fixHistoryScreen === 'function') {
+        window.fixHistoryScreen();
+      }
       
       // Fix admin panel
       fixAdminPanel();
       
-      log('Core fixes applied successfully');
+      if (typeof log === 'function') {
+        log('Core fixes applied successfully');
+      } else {
+        console.log('Core fixes applied successfully');
+      }
     } catch (error) {
-      log(`Error applying core fixes: ${error.message}`, 'error');
+      console.error(`Error applying core fixes: ${error.message}`);
       console.error('Stack trace:', error.stack);
     }
   }
 
-  // Start content observer
-  function setupContentObserver() {
-    log('Setting up content observer');
-    
-    // Create a MutationObserver to watch for DOM changes
-    const observer = new MutationObserver((mutations) => {
-      mutations.forEach((mutation) => {
-        if (mutation.type === 'childList' && mutation.addedNodes.length > 0) {
-          // Re-apply fixes to newly added elements
-          if (CONFIG.autoApplyFixes) {
-            applyCoreFixes();
-          }
-        } else if (mutation.type === 'attributes') {
-          // Check if a screen has been shown or hidden
-          if (mutation.attributeName === 'class' && 
-              mutation.target.classList && 
-              (mutation.target.classList.contains('screen'))) {
-            
-            const isHidden = mutation.target.classList.contains('hidden');
-            const screenId = mutation.target.id;
-            
-            if (!isHidden && screenId) {
-              log(`Screen ${screenId} has been shown, applying specific fixes`);
-              window.screenTransitionHandler(screenId);
-            }
-          }
-        }
-      });
-    });
-
-    // Observe attribute changes to detect screen visibility changes
-    const observerConfig = { 
-      childList: true, 
-      subtree: true, 
-      attributes: true,
-      attributeFilter: ['class']
-    };
-
-    // Start observing the document with the configured parameters
-    observer.observe(document.body, observerConfig);
-    
-    log('Content observer setup complete');
-  }
-
   // Final cleanup and checks
   function finalCleanup() {
-    log('Performing final cleanup');
+    if (typeof log === 'function') {
+      log('Performing final cleanup');
+    } else {
+      console.log('Performing final cleanup');
+    }
     
     try {
       // Make sure all element caches are cleared
-      window.clearElementCache();
+      if (typeof window.clearElementCache === 'function') {
+        window.clearElementCache();
+      }
       
       // Re-apply fixes one more time to catch any race conditions
       applyCoreFixes();
       
-      // Check for missing core elements and create them if needed
-      ensureCoreElementsExist();
-      
       // Initialize event listeners
       setupActionButtonsEventListeners();
       
-      log('Final cleanup completed successfully');
-    } catch (error) {
-      log(`Error during final cleanup: ${error.message}`, 'error');
-    }
-  }
-
-  // Ensure all core elements exist
-  function ensureCoreElementsExist() {
-    log('Ensuring all core elements exist');
-    
-    // Check for main screens and create them if missing
-    const coreScreens = [
-      { id: 'token-detail', creator: createTokenDetailView },
-      { id: 'send-screen', creator: createSendScreen },
-      { id: 'receive-screen', creator: createReceiveScreen },
-      { id: 'history-screen', creator: createHistoryScreen }
-    ];
-    
-    coreScreens.forEach(screen => {
-      const element = document.getElementById(screen.id);
-      if (!element || element.children.length === 0) {
-        log(`Creating missing core screen: ${screen.id}`);
-        screen.creator();
+      if (typeof log === 'function') {
+        log('Final cleanup completed successfully');
+      } else {
+        console.log('Final cleanup completed successfully');
       }
-    });
+    } catch (error) {
+      console.error(`Error during final cleanup: ${error.message}`);
+    }
   }
 
   // Setup global event listeners for action buttons
   function setupActionButtonsEventListeners() {
-    log('Setting up global event listeners');
+    if (typeof log === 'function') {
+      log('Setting up global event listeners');
+    } else {
+      console.log('Setting up global event listeners');
+    }
     
     // Setup send and receive buttons on main screen
     const sendButton = document.getElementById('send-button');
     if (sendButton) {
       sendButton.addEventListener('click', function() {
-        window.navigateTo('send-screen');
+        if (typeof window.navigateTo === 'function') {
+          window.navigateTo('send-screen');
+        }
       });
     }
     
     const receiveButton = document.getElementById('receive-button');
     if (receiveButton) {
       receiveButton.addEventListener('click', function() {
-        window.navigateTo('receive-screen');
+        if (typeof window.navigateTo === 'function') {
+          window.navigateTo('receive-screen');
+        }
       });
     }
     
@@ -1004,7 +1080,9 @@ function handleNumpadKey() {
     const historyButton = document.querySelector('.quick-actions .action-circle:nth-child(5)');
     if (historyButton) {
       historyButton.addEventListener('click', function() {
-        window.navigateTo('history-screen');
+        if (typeof window.navigateTo === 'function') {
+          window.navigateTo('history-screen');
+        }
       });
     }
     
@@ -1013,7 +1091,9 @@ function handleNumpadKey() {
       button.addEventListener('click', function() {
         const screen = this.closest('.screen');
         if (screen) {
-          window.navigateTo('wallet-screen');
+          if (typeof window.navigateTo === 'function') {
+            window.navigateTo('wallet-screen');
+          }
         }
       });
     });
@@ -1041,13 +1121,17 @@ function handleNumpadKey() {
       }
     });
     
-    log('Global event listeners setup complete');
+    if (typeof log === 'function') {
+      log('Global event listeners setup complete');
+    } else {
+      console.log('Global event listeners setup complete');
+    }
   }
 
   // Global error recovery handler
   function setupErrorRecovery() {
     window.addEventListener('error', function(event) {
-      log(`Global error: ${event.message} at ${event.filename}:${event.lineno}`, 'error');
+      console.error(`Global error: ${event.message} at ${event.filename}:${event.lineno}`);
       
       // Prevent app from crashing
       event.preventDefault();
@@ -1056,12 +1140,12 @@ function handleNumpadKey() {
       try {
         applyCoreFixes();
       } catch (e) {
-        log(`Failed to recover from error: ${e.message}`, 'error');
+        console.error(`Failed to recover from error: ${e.message}`);
       }
     });
     
     window.addEventListener('unhandledrejection', function(event) {
-      log(`Unhandled promise rejection: ${event.reason}`, 'error');
+      console.error(`Unhandled promise rejection: ${event.reason}`);
       
       // Prevent app from crashing
       event.preventDefault();
@@ -1080,7 +1164,7 @@ function recoverFromLoadingIssues() {
     // Hide network error
     const networkError = document.getElementById('network-error');
     if (networkError) {
-        networkError.style.display = 'none';
+        networkError.classList.add('hidden');
     }
     
     // Make sure lock screen is visible
@@ -1088,6 +1172,11 @@ function recoverFromLoadingIssues() {
     if (lockScreen) {
         lockScreen.classList.remove('hidden');
     }
+    
+    // Hide all other screens
+    document.querySelectorAll('.screen:not(#lock-screen)').forEach(screen => {
+        screen.classList.add('hidden');
+    });
     
     // Re-initialize passcode handling as a simple solution
     try {
@@ -1133,141 +1222,39 @@ function recoverFromLoadingIssues() {
         console.error('Recovery failed:', e);
     }
 }
- function initFixes() {
-    log(`Initializing Trust Wallet UI Patch v${CONFIG.version}`);
+
+// Initialize everything when document is ready
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('DOM ready - initializing Trust Wallet UI');
     
-    // Only start if document is fully loaded
-    if (document.readyState === 'complete' || document.readyState === 'interactive') {
-        setTimeout(startPatching, CONFIG.initDelay);
-    } else {
-        document.addEventListener('DOMContentLoaded', () => {
-            setTimeout(startPatching, CONFIG.initDelay);
-        });
+    // Hide network error if showing
+    const networkError = document.getElementById('network-error');
+    if (networkError) {
+        networkError.classList.add('hidden');
     }
-}
- // Start patching process
-function startPatching() {
-    try {
-        // Hide network error if it's showing (do this first thing)
-        const networkError = document.getElementById('network-error');
-        if (networkError) {
-            networkError.style.display = 'none';
-        }
-        
-        // Setup default wallet data first
-        setupDefaultWalletData().then(() => {
-            // Setup error recovery
-            setupErrorRecovery();
-            
-            // Apply initial fixes
-            applyCoreFixes();
-            
-            // Setup observers
-            setupContentObserver();
-            
-            // Setup passcode handling
-            initPasscodeHandling();
-            
-            // Schedule final cleanup
-            setTimeout(finalCleanup, CONFIG.finalCleanupDelay);
-            
-            // Expose global API
-            exposeGlobalAPI();
-            
-            log(`Trust Wallet UI Patch v${CONFIG.version} successfully initialized`);
-        });
-    } catch (error) {
-        log(`Patching failed: ${error.message}`, 'error');
-        // Try recovery if patching fails
-        recoverFromLoadingIssues();
+    
+    // Initialize passcode handling
+    initPasscodeHandling();
+    
+    // Setup error recovery
+    setupErrorRecovery();
+    
+    // Setup wallet data
+    if (typeof window.setupDefaultWalletData === 'function') {
+        window.setupDefaultWalletData();
     }
-}
-
-  // Expose global API
-  function exposeGlobalAPI() {
-    window.TrustWalletPatch = {
-      version: CONFIG.version,
-      debug: (enable = true) => {
-        CONFIG.debug = enable;
-        log(`Debug mode ${enable ? 'enabled' : 'disabled'}`);
-      },
-      init: initFixes,
-      config: {
-        get: () => ({...CONFIG}),
-        set: (key, value) => {
-          if (key in CONFIG) {
-            CONFIG[key] = value;
-            log(`Config updated: ${key} = ${value}`);
-          }
+    
+    // Apply fixes and cleanup
+    setTimeout(function() {
+        applyCoreFixes();
+        finalCleanup();
+    }, 500);
+    
+    // Recovery timeout - if still showing loading after 2 seconds, force recovery
+    setTimeout(function() {
+        const lockScreen = document.getElementById('lock-screen');
+        if (lockScreen && lockScreen.classList.contains('hidden')) {
+            recoverFromLoadingIssues();
         }
-      }
-    };
-  }
-
-  // Create full TrustWallet API
-  window.TrustWallet = {
-    // Version information
-    version: CONFIG.version,
-    buildDate: CONFIG.lastUpdate,
-    
-    // Core functions
-    init: function() {
-      initFixes();
-    },
-    
-    navigateTo: window.navigateTo,
-    showToast: window.showToast,
-
-    // State management
-    updateWalletUI: function() {
-      populateMainWalletTokenList();
-      updateBalanceDisplay();
-    },
-    
-    setupDemoBalance: window.setupDemoBalance,
-    
-    getCurrentWallet: function() {
-      const activeWallet = window.activeWallet || 'main';
-      return {
-        id: activeWallet,
-        name: this.getWalletName(activeWallet),
-        totalBalance: window.currentWalletData?.[activeWallet]?.totalBalance || 0,
-        tokens: window.currentWalletData?.[activeWallet]?.tokens || []
-      };
-    },
-    
-    getWalletName: function(walletId) {
-      const walletNames = {
-        'main': 'Main Wallet 1',
-        'secondary': 'Main Wallet 2',
-        'business': 'Business Wallet'
-      };
-      return walletNames[walletId] || walletId;
-    },
-    
-    getWallets: function() {
-      if (!window.currentWalletData) return [];
-      
-      return Object.keys(window.currentWalletData).map(walletId => ({
-        id: walletId,
-        name: this.getWalletName(walletId),
-        totalBalance: window.currentWalletData[walletId].totalBalance || 0,
-        tokenCount: window.currentWalletData[walletId].tokens.length || 0
-      }));
-    },
-    
-    switchWallet: window.switchWallet,
-    
-    // Token management
-    showTokenDetail: window.showTokenDetail,
-    showSendScreen: window.showSendScreen,
-    showReceiveScreen: window.showReceiveScreen,
-    
-    // Admin panel
-    showAdminPanel: showAdminPanel
-  };
-
-  // Start initialization
-  initFixes();
-
-})();
+    }, 2000);
+});
