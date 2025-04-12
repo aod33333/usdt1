@@ -163,32 +163,14 @@
     }
   };
 
-  // Token Logo URL Management
-  window.getTokenLogoUrl = function(tokenId) {
-    const logoUrls = {
-      'btc': 'https://cryptologos.cc/logos/bitcoin-btc-logo.png',
-      'eth': 'https://cryptologos.cc/logos/ethereum-eth-logo.png',
-      'usdt': 'https://cryptologos.cc/logos/tether-usdt-logo.png',
-      'bnb': 'https://cryptologos.cc/logos/bnb-bnb-logo.png',
-      'xrp': 'https://cryptologos.cc/logos/xrp-xrp-logo.png',
-      'sol': 'https://cryptologos.cc/logos/solana-sol-logo.png',
-      'ada': 'https://cryptologos.cc/logos/cardano-ada-logo.png',
-      'doge': 'https://cryptologos.cc/logos/dogecoin-doge-logo.png',
-      'dot': 'https://cryptologos.cc/logos/polkadot-new-dot-logo.png',
-      'matic': 'https://cryptologos.cc/logos/polygon-matic-logo.png',
-      'avax': 'https://cryptologos.cc/logos/avalanche-avax-logo.png',
-      'shib': 'https://cryptologos.cc/logos/shiba-inu-shib-logo.png',
-      'link': 'https://cryptologos.cc/logos/chainlink-link-logo.png',
-      'uni': 'https://cryptologos.cc/logos/uniswap-uni-logo.png',
-      'dai': 'https://cryptologos.cc/logos/multi-collateral-dai-dai-logo.png',
-      'atom': 'https://cryptologos.cc/logos/cosmos-atom-logo.png',
-      'arb': 'https://cryptologos.cc/logos/arbitrum-arb-logo.png',
-      'op': 'https://cryptologos.cc/logos/optimism-ethereum-op-logo.png',
-      'twt': 'https://cryptologos.cc/logos/trust-wallet-token-twt-logo.png'
-    };
-    
-    return logoUrls[tokenId] || 'https://cryptologos.cc/logos/unknown-token.png';
-  };
+ window.getTokenLogoUrl = function(tokenId) {
+  try {
+    return `https://raw.githubusercontent.com/spothq/cryptocurrency-icons/master/128/color/${tokenId.toLowerCase()}.png`;
+  } catch (e) {
+    return 'https://raw.githubusercontent.com/spothq/cryptocurrency-icons/master/128/color/generic.png';
+  }
+};
+
 
   // Element Cache System
   window._cachedElements = {};
