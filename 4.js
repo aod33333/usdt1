@@ -1369,22 +1369,3 @@ window.formatCurrency = window.formatCurrency || function(amount) {
 };
 
 window.showTransactionDetails = showTransactionDetails;
-
-// Ensure functions are globally available
-window.fixTokenDetailView = window.fixTokenDetailView || function() {
-    console.log('Fixing token detail view');
-    // Add fallback implementation if not defined elsewhere
-};
-
-window.updateNetworkBadge = window.updateNetworkBadge || function(badge, tokenId, badgeUrl, network) {
-    console.log('Updating network badge');
-    // Fallback implementation
-    if (badge && badgeUrl) {
-        const badgeImg = badge.querySelector('img');
-        if (badgeImg) {
-            badgeImg.src = badgeUrl;
-            badgeImg.alt = network || (tokenId.toUpperCase() + ' Network');
-        }
-    }
-};
-})();
