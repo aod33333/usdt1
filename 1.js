@@ -27,68 +27,101 @@
     }
   }
 
-  // Safely initialize toast notifications
-  if (typeof window.showToast !== 'function') {
-    window.showToast = function(message, duration = 2000) {
-      // Initialize toast queue if not exists
-      if (!window.toastQueue) {
-        window.toastQueue = [];
+  // Make navigation function globally available
+  window.navigateTo = function(screenId) {
+    log(`Navigating to screen: ${screenId}`);
+    // First hide all screens
+    const screens = document.querySelectorAll('.screen');
+    screens.forEach(screen => {
+      screen.classList.add('hidden');
+    });
+    
+    // Show the requested screen
+    const targetScreen = document.getElementById(screenId);
+    if (targetScreen) {
+      targetScreen.classList.remove('hidden');
+      
+      // Trigger screen-specific initialization
+      if (typeof window.screenTransitionHandler === 'function') {
+        window.screenTransitionHandler(screenId);
+      }
+    }
+  };
+
+  // Format utilities - make globally available
+  window.formatCurrency = function(amount, currency = 'USD') {
+    try {
+      return new Intl.NumberFormat('en-US', {
+        style: 'currency',
+        currency: currency,
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+      }).format(amount);
+    } catch (e) {
+      return '$' + parseFloat(amount).toFixed(2);
+    }
+  };
+  
+  // Safely initialize toast notifications - make globally available
+  window.showToast = function(message, duration = 2000) {
+    // Initialize toast queue if not exists
+    if (!window.toastQueue) {
+      window.toastQueue = [];
+    }
+    
+    // Add to queue
+    window.toastQueue.push({
+      message,
+      duration
+    });
+    
+    // Process queue if not already processing
+    if (!window.processingToast) {
+      processToastQueue();
+    }
+    
+    function processToastQueue() {
+      if (window.toastQueue.length === 0) {
+        window.processingToast = false;
+        return;
       }
       
-      // Add to queue
-      window.toastQueue.push({
-        message,
-        duration
-      });
-      
-      // Process queue if not already processing
-      if (!window.processingToast) {
-        processToastQueue();
+      window.processingToast = true;
+      const toast = window.toastQueue.shift();
+      showSingleToast(toast.message, toast.duration);
+    }
+    
+    function showSingleToast(message, duration) {
+      // Remove any existing toast
+      const existingToast = document.querySelector('.tw-toast');
+      if (existingToast) {
+        document.body.removeChild(existingToast);
       }
       
-      function processToastQueue() {
-        if (window.toastQueue.length === 0) {
-          window.processingToast = false;
-          return;
-        }
-        
-        window.processingToast = true;
-        const toast = window.toastQueue.shift();
-        showSingleToast(toast.message, toast.duration);
-      }
+      // Create new toast
+      const toast = document.createElement('div');
+      toast.className = 'tw-toast';
+      toast.textContent = message;
+      document.body.appendChild(toast);
       
-      function showSingleToast(message, duration) {
-        // Remove any existing toast
-        const existingToast = document.querySelector('.tw-toast');
-        if (existingToast) {
-          document.body.removeChild(existingToast);
-        }
-        
-        // Create new toast
-        const toast = document.createElement('div');
-        toast.className = 'tw-toast';
-        toast.textContent = message;
-        document.body.appendChild(toast);
-        
-        // Show toast
+      // Show toast
+      setTimeout(() => {
+        toast.classList.add('visible');
+      }, 10);
+      
+      // Hide toast after duration
+      setTimeout(() => {
+        toast.classList.remove('visible');
         setTimeout(() => {
-          toast.classList.add('visible');
-        }, 10);
-        
-        // Hide toast after duration
-        setTimeout(() => {
-          toast.classList.remove('visible');
-          setTimeout(() => {
-            if (toast.parentNode) {
-              document.body.removeChild(toast);
-            }
-            // Process next toast in queue
-            processToastQueue();
-          }, 300);
-        }, duration);
-      }
-    };
-  }
+          if (toast.parentNode) {
+            document.body.removeChild(toast);
+          }
+          // Process next toast in queue
+          processToastQueue();
+        }, 300);
+      }, duration);
+    }
+  };
 
   // Format utilities
   window.FormatUtils = {
@@ -1013,3 +1046,52 @@
       balanceAmount.setAttribute('data-hidden', 'true');
     }
   }
+
+  // Add initialization code that runs automatically after the page loads
+  document.addEventListener('DOMContentLoaded', function() {
+    log('DOM has loaded, initializing app');
+    
+    // Hide network error overlay if present
+    const networkError = document.getElementById('network-error');
+    if (networkError) {
+      networkError.classList.add('hidden');
+    }
+    
+    // Initialize default wallet data
+    setupDefaultWalletData().then(() => {
+      // Setup event handlers for passcode screen
+      const numpadKeys = document.querySelectorAll('.numpad-key');
+      numpadKeys.forEach(key => {
+        key.addEventListener('click', function() {
+          const keyValue = this.getAttribute('data-key');
+          if (keyValue === 'bio') {
+            // Simulate biometric authentication success
+            const lockScreen = document.getElementById('lock-screen');
+            const walletScreen = document.getElementById('wallet-screen');
+            
+            if (lockScreen && walletScreen) {
+              lockScreen.classList.add('hidden');
+              walletScreen.classList.remove('hidden');
+              
+              // Update wallet data
+              updateBalanceDisplay();
+              populateMainWalletTokenList();
+              
+              // Apply screen transition
+              if (typeof window.screenTransitionHandler === 'function') {
+                window.screenTransitionHandler('wallet-screen');
+              }
+            }
+          }
+        });
+      });
+      
+      // Run initial screen fixes
+      if (typeof enhanceHomeScreen === 'function') {
+        enhanceHomeScreen();
+      }
+    }).catch(error => {
+      console.error('Error setting up wallet data:', error);
+    });
+  });
+})();
