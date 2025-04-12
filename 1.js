@@ -1094,4 +1094,20 @@
       console.error('Error setting up wallet data:', error);
     });
   });
+
+  // Expose critical functions to window before ending IIFE
+window.enhanceHomeScreen = enhanceHomeScreen;
+window.fixTokenDetailView = fixTokenDetailView || function(){};
+window.fixSendScreen = fixSendScreen || function(){};
+window.fixReceiveScreen = fixReceiveScreen || function(){};
+window.fixHistoryScreen = fixHistoryScreen || function(){};
+window.enhanceNetworkBadges = enhanceNetworkBadges || function(){};
+window.fixNetworkSelection = fixNetworkSelection || function(){};
+window.setupDefaultWalletData = setupDefaultWalletData;
+window.updateBalanceDisplay = updateBalanceDisplay;
+window.populateMainWalletTokenList = populateMainWalletTokenList;
+window.enhanceTokenDetailBadge = enhanceTokenDetailBadge || function(){};
+window.fixStakingBanner = fixStakingBanner || function(){};
+window.updateTransactionList = updateTransactionList || function(){};
+window.log = log;
 })();
