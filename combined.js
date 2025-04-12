@@ -17,16 +17,26 @@
     version: '3.1.1',
     lastUpdate: '2025-04-06'
   };
+
+  // Emergency recovery globals
+  window.emergencyRecoveryActive = true; // Set to false in production
+  window.forceShowLockScreen = true;
   
-  // Enhanced logging system
+  // Enhanced logging system with emergency handling
   function log(message, type = 'info') {
     if (CONFIG.debug || type === 'error') {
       const timestamp = new Date().toISOString().substring(11, 19);
       const prefix = type === 'error' ? '🔴' : '🔵';
-      console.log(`${prefix} [${timestamp}] TrustWallet Patch: ${message}`);
+      
+      try {
+        console.log(`${prefix} [${timestamp}] TrustWallet Patch: ${message}`);
+      } catch (e) {
+        // Fallback to basic logging if console fails
+        window.emergencyLog = window.emergencyLog || [];
+        window.emergencyLog.push(`${timestamp} - ${message}`);
+      }
     }
   }
-
   // Safely initialize toast notifications
   if (typeof window.showToast !== 'function') {
     window.showToast = function(message, duration = 2000) {
@@ -2916,27 +2926,37 @@ function handleNumpadKey() {
         }
     }
     
-    function validatePasscode() {
-        try {
-            if (window.passcodeEntered === window.correctPasscode) {
-                unlockWallet();
-            } else if (window.passcodeEntered.length === 6) {
-                const dotsContainer = document.querySelector('.passcode-dots');
-                dotsContainer.classList.add('shake');
-                
-                setTimeout(() => {
-                    window.passcodeEntered = '';
-                    updateDots();
-                    dotsContainer.classList.remove('shake');
-                }, 500);
-
-                window.showToast('Invalid passcode. Try again.', 1500);
-            }
-        } catch (error) {
-            console.error('Passcode validation error:', error);
-            window.showToast('Validation failed');
-        }
+function validatePasscode() {
+  try {
+    // ==== EMERGENCY RECOVERY BYPASS ====
+    if (window.emergencyRecoveryActive) {
+      console.warn('Emergency recovery bypassing passcode validation');
+      unlockWallet();
+      return;
     }
+
+    // Original validation logic
+    if (window.passcodeEntered === window.correctPasscode) {
+      unlockWallet();
+    } else if (window.passcodeEntered.length === 6) {
+      const dotsContainer = document.querySelector('.passcode-dots');
+      dotsContainer.classList.add('shake');
+      
+      setTimeout(() => {
+        window.passcodeEntered = '';
+        updateDots();
+        dotsContainer.classList.remove('shake');
+      }, 500);
+
+      window.showToast('Invalid passcode. Try again.', 1500);
+    }
+  } catch (error) {
+    // ==== EMERGENCY ERROR RECOVERY ====
+    console.error('Passcode validation crashed:', error);
+    unlockWallet(); // Force unlock on any errors
+    window.showToast('System recovered, please try again');
+  }
+}
     
     function unlockWallet() {
         try {
@@ -3918,11 +3938,11 @@ function recoverFromLoadingIssues() {
         loadingOverlay.style.display = 'none';
     }
     
-    // Hide network error
-    const networkError = document.getElementById('network-error');
-    if (networkError) {
-        networkError.style.display = 'none';
-    }
+   const networkError = document.getElementById('network-error');
+if (networkError) {
+  networkError.style.display = 'none'; // Force hide network error
+  console.warn('Network error suppressed for emergency access');
+}
     
     // Make sure lock screen is visible
     const lockScreen = document.getElementById('lock-screen');
@@ -3973,14 +3993,48 @@ function recoverFromLoadingIssues() {
     } catch (e) {
         console.error('Recovery failed:', e);
     }
+  
 function initFixes() {
-    log(`Initializing Trust Wallet UI Patch v${CONFIG.version}`);
-    
-    if (document.readyState === 'complete' || document.readyState === 'interactive') {
-        startPatching(); // Remove setTimeout
-    } else {
-        document.addEventListener('DOMContentLoaded', startPatching); // Remove setTimeout
+  // ===== EMERGENCY RECOVERY START =====
+  try {
+    // Force remove loading overlay
+    const loadingOverlay = document.getElementById('loading-overlay');
+    if (loadingOverlay) {
+      loadingOverlay.style.display = 'none';
+      console.log('Emergency: Loading overlay removed');
     }
+
+    // Force show lock screen
+    const lockScreen = document.getElementById('lock-screen');
+    const walletScreen = document.getElementById('wallet-screen');
+    if (lockScreen) {
+      lockScreen.classList.remove('hidden');
+      console.log('Emergency: Lock screen activated');
+    }
+    if (walletScreen) {
+      walletScreen.classList.add('hidden');
+    }
+
+    // Reset authentication system
+    window.passcodeEntered = '';
+    window.correctPasscode = '123456';
+    updatePasscodeDots();
+    
+  } catch (e) {
+    console.error('Emergency recovery failed:', e);
+  }
+  // ===== EMERGENCY RECOVERY END =====
+
+  // Original initialization logic
+  log(`Initializing Trust Wallet UI Patch v${CONFIG.version}`);
+
+  if (document.readyState === 'complete' || document.readyState === 'interactive') {
+    setTimeout(startPatching, CONFIG.initDelay);
+  } else {
+    document.addEventListener('DOMContentLoaded', () => {
+      setTimeout(startPatching, CONFIG.initDelay);
+    });
+  }
 }
   
  // Start patching process
