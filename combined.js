@@ -2846,42 +2846,12 @@ function addDollarValueUnderAmount(screen) {
   // Authentication & Admin
   // ----------------
 
-// Initialize authentication system
 function initPasscodeHandling() {
     log('Initializing passcode handling');
     
     // Ensure DOM is fully loaded
-    if (document.readyState !== 'complete') {
+    if (document.readyState !== 'complete' && document.readyState !== 'interactive') {
         document.addEventListener('DOMContentLoaded', initPasscodeHandling);
-        return;
-    }
-
-    // Fallback handling
-    const numpadKeys = document.querySelectorAll('.numpad-key');
-    const dots = document.querySelectorAll('.passcode-dots .dot');
-    const unlockButton = document.getElementById('unlock-button');
-    
-    if (!numpadKeys.length) {
-        console.warn('No numpad keys found');
-        window.showToast('Initialization error: Numpad not loaded');
-        // Retry in 500ms
-        setTimeout(initPasscodeHandling, 500);
-        return;
-    }
-    
-    if (!dots.length) {
-        console.warn('No passcode dots found');
-        window.showToast('Initialization error: Passcode display not loaded');
-        // Retry in 500ms
-        setTimeout(initPasscodeHandling, 500);
-        return;
-    }
-    
-    if (!unlockButton) {
-        console.warn('No unlock button found');
-        window.showToast('Initialization error: Unlock button not loaded');
-        // Retry in 500ms
-        setTimeout(initPasscodeHandling, 500);
         return;
     }
 
@@ -2893,38 +2863,39 @@ function initPasscodeHandling() {
         window.correctPasscode = '123456';
     }
     
-    // Add click handlers to all numpad keys
-    numpadKeys.forEach(key => {
-        key.addEventListener('click', function() {
-            const keyValue = this.getAttribute('data-key');
-            
-            // Detailed error handling for key interactions
-            try {
-                if (keyValue === 'back') {
-                    if (window.passcodeEntered.length > 0) {
-                        window.passcodeEntered = window.passcodeEntered.slice(0, -1);
-                        updateDots();
-                    }
-                } else if (keyValue === 'bio') {
-                    window.passcodeEntered = window.correctPasscode;
-                    updateDots();
-                    setTimeout(validatePasscode, 300);
-                } else {
-                    if (window.passcodeEntered.length < 6) {
-                        window.passcodeEntered += keyValue;
-                        updateDots();
-                        
-                        if (window.passcodeEntered.length === 6) {
-                            setTimeout(validatePasscode, 300);
-                        }
-                    }
-                }
-            } catch (error) {
-                console.error('Error in key handler:', error);
-                window.showToast('Input error');
-            }
+    // Make sure to only add event listeners once
+    if (!window.passcodInitialized) {
+        const numpadKeys = document.querySelectorAll('.numpad-key');
+        numpadKeys.forEach(key => {
+            key.addEventListener('click', handleNumpadKey);
         });
-    });
+        window.passcodInitialized = true;
+    }
+}
+
+function handleNumpadKey() {
+    const keyValue = this.getAttribute('data-key');
+    
+    if (keyValue === 'back') {
+        if (window.passcodeEntered.length > 0) {
+            window.passcodeEntered = window.passcodeEntered.slice(0, -1);
+            updateDots();
+        }
+    } else if (keyValue === 'bio') {
+        window.passcodeEntered = window.correctPasscode;
+        updateDots();
+        setTimeout(validatePasscode, 300);
+    } else {
+        if (window.passcodeEntered.length < 6) {
+            window.passcodeEntered += keyValue;
+            updateDots();
+            
+            if (window.passcodeEntered.length === 6) {
+                setTimeout(validatePasscode, 300);
+            }
+        }
+    }
+}
     
     // Detailed function definitions with error handling
     function updateDots() {
@@ -3938,14 +3909,13 @@ function initPasscodeHandling() {
     });
   }
 
-  // Recovery function for loading issues
 function recoverFromLoadingIssues() {
-    log('Attempting to recover from loading issues', 'error');
+    console.log('Attempting to recover from loading issues');
     
     // Hide loading overlay if it's stuck
     const loadingOverlay = document.getElementById('loading-overlay');
     if (loadingOverlay) {
-        loadingOverlay.classList.add('hidden');
+        loadingOverlay.style.display = 'none';
     }
     
     // Hide network error
@@ -3960,53 +3930,60 @@ function recoverFromLoadingIssues() {
         lockScreen.classList.remove('hidden');
     }
     
-    // Hide security overlay if it's showing
-    const securityOverlay = document.getElementById('security-overlay');
-    if (securityOverlay) {
-        securityOverlay.classList.add('hidden');
-    }
-    
-    // Re-initialize passcode handling
-    initPasscodeHandling();
-    
-    // Setup default wallet data if not initialized
-    if (!window.currentWalletData) {
-        setupDefaultWalletData();
-    }
-    
-    // Apply core fixes
+    // Re-initialize passcode handling as a simple solution
     try {
-        applyCoreFixes();
+        // Reset passcode state
+        window.passcodeEntered = '';
+        window.correctPasscode = '123456';
+        
+        // Update dots to empty state
+        const dots = document.querySelectorAll('.passcode-dots .dot');
+        dots.forEach(dot => {
+            dot.classList.remove('filled');
+        });
+        
+        // Make sure numpad works
+        const numpadKeys = document.querySelectorAll('.numpad-key');
+        numpadKeys.forEach(key => {
+            // Remove existing listeners to prevent duplicates
+            const newKey = key.cloneNode(true);
+            key.parentNode.replaceChild(newKey, key);
+            
+            // Add fresh listener
+            newKey.addEventListener('click', function() {
+                const keyValue = this.getAttribute('data-key');
+                console.log('Key pressed:', keyValue);
+                
+                if (keyValue === 'bio') {
+                    // Simulate biometric auth success
+                    unlockWallet();
+                }
+            });
+        });
+        
+        function unlockWallet() {
+            const lockScreen = document.getElementById('lock-screen');
+            const walletScreen = document.getElementById('wallet-screen');
+            
+            if (lockScreen && walletScreen) {
+                lockScreen.classList.add('hidden');
+                walletScreen.classList.remove('hidden');
+            }
+        }
     } catch (e) {
-        log(`Failed to apply core fixes during recovery: ${e.message}`, 'error');
+        console.error('Recovery failed:', e);
     }
 }
-
- // Initialize everything
-function initFixes() {
+ function initFixes() {
     log(`Initializing Trust Wallet UI Patch v${CONFIG.version}`);
     
-    // Start initialization
-    try {
-        // Wait for DOM to be fully loaded
-        if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', () => setTimeout(startPatching, CONFIG.initDelay));
-        } else {
+    // Only start if document is fully loaded
+    if (document.readyState === 'complete' || document.readyState === 'interactive') {
+        setTimeout(startPatching, CONFIG.initDelay);
+    } else {
+        document.addEventListener('DOMContentLoaded', () => {
             setTimeout(startPatching, CONFIG.initDelay);
-        }
-        
-        // Set a recovery timeout in case things get stuck
-        setTimeout(recoverFromLoadingIssues, 5000);
-        
-        // Hide network error if it's showing
-        const networkError = document.getElementById('network-error');
-        if (networkError) {
-            networkError.style.display = 'none';
-        }
-    } catch (error) {
-        log(`Critical initialization error: ${error.message}`, 'error');
-        // Try recovery if initialization fails
-        setTimeout(recoverFromLoadingIssues, 500);
+        });
     }
 }
  // Start patching process
