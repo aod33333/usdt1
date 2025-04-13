@@ -372,6 +372,7 @@ button {
 }
 
 .investment-warning-text p {
+    display: inline; /* Keep paragraph text inline with link */
     line-height: 1.4 !important;
     margin-bottom: 3px !important;
 }
