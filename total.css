@@ -380,23 +380,6 @@ button {
     padding-left: 8px; /* Balanced spacing */
 }
 
-/* Add this to keep text and link on same line */
-.investment-warning-text {
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    display: inline-block;
-    width: calc(100% - 60px); /* Account for icon + close button */
-}
-
-/* Fix text alignment */
-.investment-warning-text p,
-.investment-warning-text a {
-    display: inline !important;
-    margin: 0;
-    padding: 0;
-}
-
 /* Search Container */
 .search-container {
     padding: 0 var(--space-md) var(--space-md);
