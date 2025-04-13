@@ -1686,7 +1686,7 @@ body.dark-mode {
 }
 
 .lock-logo {
-    width: 100px;
+    width: 200px;
     height: auto;
     margin-bottom: var(--space-md);
 }
