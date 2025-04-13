@@ -380,11 +380,6 @@ button {
     padding-left: 8px; /* Balanced spacing */
 }
 
-/* Add this single rule */
-.investment-warning-text p {
-    margin-bottom: 0 !important; /* Removes space below paragraph */
-}
-
 /* Search Container */
 .search-container {
     padding: 0 var(--space-md) var(--space-md);
