@@ -336,61 +336,48 @@ button {
 
 /* Investment Warning banners */
 .investment-warning {
-    width: calc(100% - (2 * var(--space-md)));
+    width: calc(100% - (2 * var(--space-md))); /* 100% - 32px */
+    margin: 8px var(--space-md); /* Equal horizontal margins */
     background-color: var(--tw-warning-bg);
     color: var(--tw-warning-text);
-    padding: 8px;
+    padding: 12px 12px 12px 8px; /* Adjusted left padding */
     font-size: 10px !important;
-    margin: 8px;
     border-radius: 8px;
     border-left: 4px solid var(--tw-warning-text);
     display: flex;
     align-items: flex-start;
     box-sizing: border-box;
+    position: relative; /* Added for border positioning */
+}
+
+/* Creates visual balance for the border */
+.investment-warning::before {
+    content: "";
+    position: absolute;
+    left: -4px; /* Matches border width */
+    top: 8px;
+    bottom: 8px;
+    width: 4px;
+    background: var(--tw-warning-text);
+    border-radius: 2px 0 0 2px;
 }
 
 .investment-warning-content {
     display: flex;
     align-items: flex-start;
-    justify-content: flex-start;
+    gap: 8px;
     width: 100%;
+    padding-left: 4px; /* Compensates for border */
 }
 
 .warning-icon {
     font-size: 20px;
-    color: var(--tw-warning-text);
-    flex-shrink: 0;
-    margin-right: 12px;
-    align-self: flex-start;
-    margin-top: 2px;
-}
-
-.investment-warning-text {
-    flex: 1;
-    padding-right: 8px;
-    line-height: 1.4 !important;
-}
-
-.investment-warning-text p {
-    display: inline; /* Keep paragraph text inline with link */
-    line-height: 1.4 !important;
-    margin-bottom: 3px !important;
-}
-
-.learn-more {
-    display: inline !important;
-    margin-top: 0 !important;
-    line-height: 1.4 !important;
+    margin-right: 8px; /* Reduced from 12px */
 }
 
 .close-warning {
-    color: var(--tw-medium-gray);
-    font-size: var(--font-md);
-    background: none;
-    border: none;
-    padding: 0;
     margin-left: auto;
-    align-self: flex-start;
+    padding-left: 8px; /* Balanced spacing */
 }
 
 /* Search Container */
