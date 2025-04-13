@@ -1,4 +1,4 @@
-  // ----------------
+// ----------------
   // Token Detail View Functions
   // ----------------
 
@@ -375,7 +375,7 @@ function enhanceNetworkBadges() {
     }
   }
 
-  // Fix token detail layout
+  // Fix token detail layout - Updated to fix price chart issue
   function fixTokenDetailLayout() {
     const tokenDetailContent = document.querySelector('.token-detail-content');
     if (!tokenDetailContent) return;
@@ -385,11 +385,36 @@ function enhanceNetworkBadges() {
       overflow-y: auto !important;
       padding: 0 !important;
       scrollbar-width: none !important;
+      display: flex !important;
+      flex-direction: column !important;
     `;
+
+    // Hide price chart if it exists
+    const priceChart = tokenDetailContent.querySelector('.price-chart-container');
+    if (priceChart) {
+      priceChart.style.display = 'none';
+    }
 
     fixIconAndBalance(tokenDetailContent);
     fixActionButtons(tokenDetailContent);
     fixTransactionSection(tokenDetailContent);
+
+    // Make sure token details match the reference design
+    const tokenDetailBalance = tokenDetailContent.querySelector('.token-detail-balance');
+    if (tokenDetailBalance) {
+      tokenDetailBalance.style.textAlign = 'center';
+      tokenDetailBalance.style.marginBottom = '24px';
+    }
+    
+    // Fix transaction list section to match reference design
+    const transactionList = tokenDetailContent.querySelector('.transaction-list');
+    if (transactionList) {
+      transactionList.style.flex = '1';
+      transactionList.style.display = 'flex';
+      transactionList.style.flexDirection = 'column';
+      transactionList.style.alignItems = 'center';
+      transactionList.style.justifyContent = 'center';
+    }
   }
 
   function fixIconAndBalance(content) {
@@ -399,6 +424,9 @@ function enhanceNetworkBadges() {
         margin: 8px 0 4px !important;
         position: relative !important;
         overflow: visible !important;
+        display: flex !important;
+        justify-content: center !important;
+        align-items: center !important;
       `;
     }
 
@@ -768,4 +796,16 @@ function enhanceNetworkBadges() {
         }
       });
     }
+  }
+
+  // Helper function to update network badge
+  function updateNetworkBadge(badge, tokenId, badgeUrl, network) {
+    const badgeImg = badge.querySelector('img');
+    if (badgeImg) {
+      badgeImg.src = badgeUrl;
+      badgeImg.alt = network || (tokenId.toUpperCase() + ' Network');
+    }
+    
+    // Re-apply badge styling to ensure visibility
+    applyBadgeStyling(badge);
   }
