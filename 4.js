@@ -360,17 +360,14 @@ window.setupDemoBalance = function() {
   // ----------------
 
  window.showSendScreen = function(tokenId) {
+  // If no tokenId is provided, show the token selection screen first
   if (!tokenId) {
-    const activeWallet = window.activeWallet || 'main';
-    const wallet = window.currentWalletData?.[activeWallet];
-    if (wallet && wallet.tokens.length > 0) {
-      tokenId = wallet.tokens[0].id;
-    } else {
-      window.showToast('No tokens available to send');
-      return false;
-    }
+    // Populate token selection list & show selection screen
+    // This is now handled in 3.js
+    return true;
   }
   
+  // Current code for populating send screen with selected token
   const activeWallet = window.activeWallet || 'main';
   const wallet = window.currentWalletData?.[activeWallet];
   if (!wallet) return false;
@@ -441,17 +438,14 @@ window.setupDemoBalance = function() {
 
   // Add receive screen functionality
   window.showReceiveScreen = function(tokenId) {
+    // If no tokenId is provided, show the token selection screen first
     if (!tokenId) {
-      const activeWallet = window.activeWallet || 'main';
-      const wallet = window.currentWalletData?.[activeWallet];
-      if (wallet && wallet.tokens.length > 0) {
-        tokenId = wallet.tokens[0].id;
-      } else {
-        window.showToast('No tokens available to receive');
-        return false;
-      }
+      // Populate token selection list & show selection screen
+      // This is now handled in 3.js
+      return true;
     }
     
+    // Continue with showing the receive screen with selected token
     const activeWallet = window.activeWallet || 'main';
     const wallet = window.currentWalletData?.[activeWallet];
     if (!wallet) return false;
@@ -577,12 +571,10 @@ window.setupDemoBalance = function() {
       // Fallback navigation
       const screens = document.querySelectorAll('.screen');
       screens.forEach(screen => {
-        if (screen.id === 'token-detail') {
-          screen.classList.remove('hidden');
-        } else {
-          screen.classList.add('hidden');
-        }
+        screen.classList.add('hidden');
       });
+      const historyScreen = document.getElementById('token-detail');
+      if (historyScreen) historyScreen.classList.remove('hidden');
     }
     return true;
   };
@@ -987,62 +979,61 @@ window.setupDemoBalance = function() {
     }
   }
 
+  // Updated to change from 5 to 3 taps
   function setupAdminPanelActivation() {
-    if (typeof window.log === 'function') {
-      window.log('Setting up admin panel access');
-    } else {
-      console.log('Setting up admin panel access');
+    console.log('Setting up admin panel access');
+    
+    // Remove existing target if it exists
+    const existingTarget = document.getElementById('admin-touch-target');
+    if (existingTarget) {
+      existingTarget.remove();
     }
     
-    // Create hidden touch target if it doesn't exist
-    if (!document.getElementById('admin-touch-target')) {
-      const touchTarget = document.createElement('div');
-      touchTarget.id = 'admin-touch-target';
-      touchTarget.style.cssText = `
-        position: fixed;
-        top: 25px;
-        right: 0;
-        width: 60px;
-        height: 60px;
-        z-index: 99999;
-        background-color: transparent;
-      `;
-      document.body.appendChild(touchTarget);
-      
-      // Setup tap detection
-      let tapCount = 0;
-      let lastTap = 0;
-      
-      touchTarget.addEventListener('click', function() {
-        const currentTime = new Date().getTime();
-        const tapGap = currentTime - lastTap;
-        lastTap = currentTime;
-        
-        // Reset if too slow
-        if (tapGap > 1000) {
-          tapCount = 1;
-          return;
-        }
-        
-        tapCount++;
-        
-        // Show admin panel after 5 quick taps
-        if (tapCount >= 5) {
-          showAdminPanel();
-          tapCount = 0;
-        }
-      });
-    }
+    // Create better positioned touch target
+    const touchTarget = document.createElement('div');
+    touchTarget.id = 'admin-touch-target';
+    touchTarget.style.cssText = `
+      position: fixed;
+      top: 0;
+      right: 0;
+      width: 80px;
+      height: 80px;
+      z-index: 99999;
+      background-color: transparent;
+    `;
+    document.body.appendChild(touchTarget);
     
-    // Setup close button
-    const closeAdminButton = document.getElementById('close-admin');
-    if (closeAdminButton) {
-      closeAdminButton.addEventListener('click', function() {
-        const adminPanel = document.getElementById('admin-panel');
-        if (adminPanel) {
-          adminPanel.style.display = 'none';
-        }
-      });
+    // Change from 5 taps to 3
+    let tapCount = 0;
+    let lastTap = 0;
+    
+    touchTarget.addEventListener('click', function(e) {
+      console.log('Admin target clicked!'); // Debug log
+      const currentTime = new Date().getTime();
+      const tapGap = currentTime - lastTap;
+      lastTap = currentTime;
+      
+      // Reset if too slow
+      if (tapGap > 1500) { // More forgiving time window
+        tapCount = 1;
+        return;
+      }
+      
+      tapCount++;
+      console.log('Tap count:', tapCount); // Debug log
+      
+      // Show admin after 3 quick taps (changed from 5)
+      if (tapCount >= 3) {
+        showAdminPanel();
+        tapCount = 0;
+      }
+      
+      e.stopPropagation(); // Stop event propagation
+    });
+    
+    // Add visible indicator in debug mode
+    if (document.getElementById('debug-mode')?.checked) {
+      touchTarget.style.backgroundColor = 'rgba(255,0,0,0.2)';
     }
   }
 
@@ -1173,6 +1164,7 @@ window.setupDemoBalance = function() {
     }
   }
 
+  // Updated to fix explorer display issues
   function showTransactionDetails(tx) {
     const explorerOverlay = document.getElementById('explorer-overlay');
     if (!explorerOverlay) return;
@@ -1184,13 +1176,20 @@ window.setupDemoBalance = function() {
     const txAmount = explorerOverlay.querySelector('#explorer-token-amount');
     const tokenIcon = explorerOverlay.querySelector('.explorer-token-icon img');
     
-    if (txHash) txHash.textContent = tx.hash || '0x...';
-    if (txFrom) txFrom.textContent = tx.from || '0x...';
-    if (txTo) txTo.textContent = tx.to || '0x...';
+    // Don't show contract addresses, show shortened addresses instead
+    if (txHash) txHash.textContent = tx.hash ? shortenTxHash(tx.hash) : '0x...';
+    if (txFrom) txFrom.textContent = tx.from ? shortenAddress(tx.from) : '0x...';
+    if (txTo) txTo.textContent = tx.to ? shortenAddress(tx.to) : '0x...';
     if (txAmount) txAmount.textContent = `${tx.amount.toFixed(6)} ${tx.symbol}`;
     
     if (tokenIcon) {
       tokenIcon.src = `https://cryptologos.cc/logos/${tx.symbol.toLowerCase()}-${tx.symbol.toLowerCase()}-logo.png`;
+    }
+    
+    // Hide contract address section if it exists
+    const contractRow = explorerOverlay.querySelector('.detail-row:contains("Contract Address")');
+    if (contractRow) {
+      contractRow.style.display = 'none';
     }
     
     // Show explorer
@@ -1202,6 +1201,17 @@ window.setupDemoBalance = function() {
       closeButton.addEventListener('click', function() {
         explorerOverlay.style.display = 'none';
       });
+    }
+    
+    // Helper functions
+    function shortenAddress(address) {
+      if (!address || address.length < 10) return address;
+      return address.substring(0, 6) + '...' + address.substring(address.length - 4);
+    }
+    
+    function shortenTxHash(hash) {
+      if (!hash || hash.length < 10) return hash;
+      return hash.substring(0, 10) + '...' + hash.substring(hash.length - 6);
     }
   }
 
@@ -1303,6 +1313,13 @@ window.setupDemoBalance = function() {
           }
         });
       }
+    });
+    
+    // Setup token selection screens back buttons
+    document.querySelectorAll('#send-token-select .back-button, #receive-token-select .back-button').forEach(button => {
+      button.addEventListener('click', function() {
+        window.navigateTo('wallet-screen');
+      });
     });
     
     console.log('Global event listeners setup complete');
