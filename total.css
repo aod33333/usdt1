@@ -363,7 +363,7 @@ button {
 }
 
 .investment-warning-content {
-    display: inline;
+    display: flex;
     align-items: flex-start;
     gap: 8px;
     width: 100%;
