@@ -377,7 +377,7 @@ button {
 }
 
 .learn-more {
-    display: inline-block !important;
+    display: inline !important;
     margin-top: 0 !important;
     line-height: 1.4 !important;
 }
