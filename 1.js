@@ -1,6 +1,40 @@
-// Trust Wallet UI - Comprehensive Merged Solution
-// Last updated: 2025-04-06
-// Combined solution merged from combined.js and d.js
+// CORS and Error Handling
+window.addEventListener('error', function(e) {
+    if (e.message.includes('CORS')) {
+        console.warn('CORS error detected:', e);
+    }
+}, true);
+
+function safeFetch(url, options = {}) {
+    return fetch(url, {
+        ...options,
+        mode: 'cors',
+        credentials: 'same-origin',
+        headers: {
+            ...options.headers,
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+        }
+    }).catch(error => {
+        if (error.message.includes('CORS')) {
+            console.warn('CORS error in fetch:', error);
+        }
+        throw error;
+    });
+}
+
+function handleImageError(img) {
+    img.onerror = null;
+    console.warn(`Failed to load image: ${img.src}`);
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('img').forEach(img => {
+        img.crossOrigin = 'anonymous';
+        img.onerror = () => handleImageError(img);
+    });
+});
+
 
 (function() {
   'use strict';
