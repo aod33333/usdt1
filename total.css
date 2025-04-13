@@ -1676,29 +1676,25 @@ body.dark-mode {
     padding-top: 0; /* No status bar padding on lock screen */
 }
 
-/* In PART 5: AUTHENTICATION */
-.lock-logo {
-    width: 120px !important;  /* Increased from 100px */
-    height: 120px !important; /* Added fixed height */
-    margin-bottom: var(--space-md);
-    object-fit: contain;      /* Ensures logo scales properly */
-}
-
 .lock-header {
     width: 100%;
     padding: var(--space-xl) 0;
     display: flex;
     flex-direction: column;
     align-items: center;
-    margin-top: 20%; /* Added vertical centering */
+}
+
+.lock-logo {
+    width: 100px;
+    height: auto;
+    margin-bottom: var(--space-md);
 }
 
 .lock-subtitle {
-    font-size: var(--font-md) !important; /* Increased from sm */
+    font-size: var(--font-sm);
     color: var(--tw-medium-gray);
     text-align: center;
     padding: 0 var(--space-md);
-    margin-top: var(--space-sm); /* Added spacing */
 }
 
 .passcode-container {
