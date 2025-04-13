@@ -373,6 +373,15 @@ button {
     padding-left: 4px; /* Compensates for border */
 }
 
+.investment-warning-text {
+    flex: 1;
+    display: flex;
+    align-items: center; /* Center text vertically */
+    gap: 4px;
+    line-height: 1.2 !important;
+    margin: 0;
+    padding: 0;
+
 .warning-icon {
     font-size: 20px;
     margin-right: 8px; /* Reduced from 12px */
