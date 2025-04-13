@@ -1785,7 +1785,7 @@ body.dark-mode {
 .reset-wallet-container p {
     font-size: var(--font-xs);
     color: var(--tw-medium-gray);
-    margin-bottom: var(--space-sm);
+    margin-bottom: var(--space-xs); /* Reduced from sm (8px) to xs (4px) */
     padding: 0 var(--space-md);
 }
 
@@ -1793,6 +1793,7 @@ body.dark-mode {
     color: var(--tw-blue);
     font-weight: 500;
     font-size: var(--font-xs);
+    margin-top: -4px; /* Negative margin to pull button up */
 }
 
 /* Biometric Authentication */
