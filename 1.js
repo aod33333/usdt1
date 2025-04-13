@@ -1,10 +1,41 @@
-// CORS and Error Handling
+// Enhanced CORS and resource error handling
 window.addEventListener('error', function(e) {
-    if (e.message.includes('CORS')) {
-        console.warn('CORS error detected:', e);
+    // Handle image loading errors
+    if (e.target.tagName === 'IMG') {
+        console.warn('Resource loading error:', {
+            src: e.target.src,
+            errorType: e.type,
+            corsIssue: e.target.crossOrigin === 'anonymous' && e.target.naturalWidth === 0
+        });
+
+        // Fallback to cached/local image
+        if (e.target.dataset.fallback) {
+            e.target.src = e.target.dataset.fallback;
+        }
+        return;
+    }
+
+    // Handle CORS-related script errors
+    if (e.message && /Failed to fetch|CORS|blocked by origin/.test(e.message)) {
+        console.warn('CORS error detected:', {
+            message: e.message,
+            filename: e.filename,
+            lineno: e.lineno,
+            colno: e.colno
+        });
+        
+        // Implement your CORS error recovery logic here
+        return true; // Prevent default error handling
     }
 }, true);
 
+// Add this to your images to enable fallbacks
+document.querySelectorAll('img').forEach(img => {
+    img.dataset.fallback = 'https://cryptoicons.org/api/icon/' 
+        + img.alt.toLowerCase().split(' ')[0] 
+        + '/200';
+    img.crossOrigin = 'anonymous';
+});
 function safeFetch(url, options = {}) {
     return fetch(url, {
         ...options,
