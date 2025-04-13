@@ -1,4 +1,4 @@
-  // ----------------
+// ----------------
   // Send Screen Management
   // ----------------
 
@@ -566,7 +566,12 @@ function addDollarValueUnderAmount(screen) {
     const tokenSelection = receiveScreen.querySelector('.token-selection-row');
     if (tokenSelection) {
       tokenSelection.addEventListener('click', function() {
-        window.showToast('Token selection coming soon');
+        const tokenSelectScreen = document.getElementById('receive-token-select');
+        if (tokenSelectScreen) {
+          tokenSelectScreen.classList.remove('hidden');
+        } else {
+          window.showToast('Token selection coming soon');
+        }
       });
     }
     
@@ -614,6 +619,41 @@ function addDollarValueUnderAmount(screen) {
       return;
     }
     
+    // Add network filter if missing
+    if (!historyScreen.querySelector('.networks-filter')) {
+      const filterTabs = historyScreen.querySelector('.filter-options');
+      if (filterTabs) {
+        const networksFilter = document.createElement('div');
+        networksFilter.className = 'networks-filter';
+        networksFilter.innerHTML = `
+          <button class="all-networks">
+            All Networks
+            <i class="fas fa-chevron-down"></i>
+          </button>
+        `;
+        historyScreen.insertBefore(networksFilter, filterTabs);
+      }
+    }
+    
+    // Fix filter tabs styling
+    const filterTabs = historyScreen.querySelectorAll('.filter-tab');
+    filterTabs.forEach(tab => {
+      tab.style.flex = '1';
+      tab.style.textAlign = 'center';
+      tab.style.padding = '12px 0';
+      tab.style.fontSize = '14px';
+      tab.style.fontWeight = '500';
+      tab.style.color = '#5F6C75';
+      tab.style.borderBottom = '2px solid transparent';
+    });
+    
+    // Fix active tab styling
+    const activeTab = historyScreen.querySelector('.filter-tab.active');
+    if (activeTab) {
+      activeTab.style.color = '#3375BB';
+      activeTab.style.borderBottom = '2px solid #3375BB';
+    }
+    
     // Set up transaction list
     const txList = historyScreen.querySelector('#history-transaction-list');
     if (txList) {
@@ -645,6 +685,13 @@ function addDollarValueUnderAmount(screen) {
         <h2>Transaction History</h2>
         <button class="icon-button search-button">
           <i class="fas fa-search"></i>
+        </button>
+      </div>
+      
+      <div class="networks-filter">
+        <button class="all-networks">
+          All Networks
+          <i class="fas fa-chevron-down"></i>
         </button>
       </div>
       
@@ -1053,3 +1100,235 @@ function addDollarValueUnderAmount(screen) {
       });
     }
   }
+
+  // Format currency helper
+  function formatCurrency(amount) {
+    if (typeof window.formatCurrency === 'function') {
+      return window.formatCurrency(amount);
+    } else if (typeof window.FormatUtils?.formatCurrency === 'function') {
+      return window.FormatUtils.formatCurrency(amount);
+    } else {
+      return '$' + parseFloat(amount).toFixed(2);
+    }
+  }
+
+  // ----------------
+  // Two-Stage Flow Implementation
+  // ----------------
+
+  // Updated to implement two-stage flow
+  window.showSendScreen = function(tokenId) {
+    // If no tokenId is provided, show the token selection screen first
+    if (!tokenId) {
+      // Populate the token selection list
+      const tokenList = document.getElementById('send-token-list');
+      if (tokenList) {
+        // Clear the list
+        tokenList.innerHTML = '';
+        
+        // Get active wallet data
+        const activeWallet = window.activeWallet || 'main';
+        const wallet = window.currentWalletData?.[activeWallet];
+        
+        if (wallet && wallet.tokens) {
+          // Create token items
+          wallet.tokens.forEach(token => {
+            const tokenItem = document.createElement('div');
+            tokenItem.className = 'token-item';
+            tokenItem.setAttribute('data-token-id', token.id);
+            
+            // Network badge
+            const networkBadge = token.chainBadge ? 
+              `<div class="chain-badge"><img src="${token.chainBadge}" alt="${token.network}"></div>` : '';
+            
+            tokenItem.innerHTML = `
+              <div class="token-icon">
+                <img src="${token.icon}" alt="${token.name}">
+                ${networkBadge}
+              </div>
+              <div class="token-info">
+                <div class="token-name">${token.symbol}</div>
+                <div class="token-price">
+                  ${token.name}
+                  <span class="token-price-change ${token.change >= 0 ? 'positive' : 'negative'}">
+                    ${token.change >= 0 ? '+' : ''}${token.change}%
+                  </span>
+                </div>
+              </div>
+              <div class="token-amount">
+                <div class="token-balance">${token.amount.toLocaleString()} ${token.symbol}</div>
+                <div class="token-value">$${token.value.toFixed(2)}</div>
+              </div>
+            `;
+            
+            // Add click handler to select this token
+            tokenItem.addEventListener('click', function() {
+              window.showSendScreen(token.id);
+            });
+            
+            tokenList.appendChild(tokenItem);
+          });
+        }
+      }
+      
+      // Navigate to token selection screen
+      window.navigateTo('send-token-select');
+      return true;
+    }
+    
+    // Now we have a tokenId, proceed to the send screen
+    window.activeSendTokenId = tokenId;
+    
+    const activeWallet = window.activeWallet || 'main';
+    const wallet = window.currentWalletData?.[activeWallet];
+    if (!wallet) return false;
+    
+    const token = wallet.tokens.find(t => t.id === tokenId);
+    if (!token) return false;
+    
+    const tokenSymbol = document.getElementById('send-token-symbol');
+    const tokenName = document.getElementById('send-token-name');
+    const tokenNetwork = document.getElementById('send-token-network');
+    const tokenIcon = document.querySelector('#send-screen .token-icon img');
+    const chainBadge = document.querySelector('#send-screen .chain-badge img');
+    
+    if (tokenSymbol) tokenSymbol.textContent = token.symbol;
+    if (tokenName) tokenName.textContent = token.name;
+    if (tokenNetwork) tokenNetwork.textContent = token.network;
+    if (tokenIcon) tokenIcon.src = token.icon;
+    
+    if (chainBadge && token.chainBadge) {
+      chainBadge.src = token.chainBadge;
+      chainBadge.parentElement.style.display = 'block';
+    } else if (chainBadge) {
+      chainBadge.parentElement.style.display = 'none';
+    }
+    
+    const maxAmount = document.getElementById('max-amount');
+    if (maxAmount) {
+      maxAmount.textContent = token.amount.toFixed(6);
+    }
+    
+    const amountInput = document.getElementById('send-amount');
+    const addressInput = document.getElementById('recipient-address');
+    
+    if (amountInput) amountInput.value = '';
+    if (addressInput) addressInput.value = '';
+    
+    // Update dollar value to reflect empty amount
+    const dollarValue = document.getElementById('dollar-value');
+    if (dollarValue) {
+      dollarValue.textContent = '≈ $0.00';
+    }
+    
+    // Disable send button initially
+    const sendButton = document.getElementById('send-button-confirm');
+    if (sendButton) {
+      sendButton.disabled = true;
+      sendButton.style.opacity = '0.6';
+    }
+    
+    // Navigate to send screen
+    window.navigateTo('send-screen');
+    return true;
+  };
+
+  // Updated to implement two-stage flow
+  window.showReceiveScreen = function(tokenId) {
+    // If no tokenId is provided, show the token selection screen first
+    if (!tokenId) {
+      // Populate the token selection list
+      const tokenList = document.getElementById('receive-token-list');
+      if (tokenList) {
+        // Clear the list
+        tokenList.innerHTML = '';
+        
+        // Get active wallet data
+        const activeWallet = window.activeWallet || 'main';
+        const wallet = window.currentWalletData?.[activeWallet];
+        
+        if (wallet && wallet.tokens) {
+          // Create token items
+          wallet.tokens.forEach(token => {
+            const tokenItem = document.createElement('div');
+            tokenItem.className = 'token-item';
+            tokenItem.setAttribute('data-token-id', token.id);
+            
+            // Network badge
+            const networkBadge = token.chainBadge ? 
+              `<div class="chain-badge"><img src="${token.chainBadge}" alt="${token.network}"></div>` : '';
+            
+            tokenItem.innerHTML = `
+              <div class="token-icon">
+                <img src="${token.icon}" alt="${token.name}">
+                ${networkBadge}
+              </div>
+              <div class="token-info">
+                <div class="token-name">${token.symbol}</div>
+                <div class="token-price">
+                  ${token.name}
+                  <span class="token-price-change ${token.change >= 0 ? 'positive' : 'negative'}">
+                    ${token.change >= 0 ? '+' : ''}${token.change}%
+                  </span>
+                </div>
+              </div>
+              <div class="token-amount">
+                <div class="token-balance">${token.amount.toLocaleString()} ${token.symbol}</div>
+                <div class="token-value">$${token.value.toFixed(2)}</div>
+              </div>
+            `;
+            
+            // Add click handler to select this token
+            tokenItem.addEventListener('click', function() {
+              window.showReceiveScreen(token.id);
+            });
+            
+            tokenList.appendChild(tokenItem);
+          });
+        }
+      }
+      
+      // Navigate to token selection screen
+      window.navigateTo('receive-token-select');
+      return true;
+    }
+    
+    // Now we have a tokenId, proceed to the receive screen
+    const activeWallet = window.activeWallet || 'main';
+    const wallet = window.currentWalletData?.[activeWallet];
+    if (!wallet) return false;
+    
+    const token = wallet.tokens.find(t => t.id === tokenId);
+    if (!token) return false;
+    
+    // Update receive screen UI with token details
+    const tokenSymbol = document.getElementById('receive-token-symbol');
+    const tokenName = document.getElementById('receive-token-name');
+    const tokenNetwork = document.getElementById('receive-token-network');
+    const tokenIcon = document.querySelector('#receive-screen .token-icon img');
+    const chainBadge = document.querySelector('#receive-screen .chain-badge img');
+    
+    if (tokenSymbol) tokenSymbol.textContent = token.symbol;
+    if (tokenName) tokenName.textContent = token.name;
+    if (tokenNetwork) tokenNetwork.textContent = token.network;
+    if (tokenIcon) tokenIcon.src = token.icon;
+    
+    if (chainBadge && token.chainBadge) {
+      chainBadge.src = token.chainBadge;
+      chainBadge.parentElement.style.display = 'block';
+    } else if (chainBadge) {
+      chainBadge.parentElement.style.display = 'none';
+    }
+    
+    // Update warning message
+    const receiveWarning = document.querySelector('.receive-warning');
+    if (receiveWarning) {
+      receiveWarning.innerHTML = `Only send ${token.symbol} (${token.network}) to this address.<br>Sending any other coin may result in permanent loss.`;
+    }
+    
+    // Update QR code (in real app, this would be a dynamic QR code)
+    
+    // Navigate to receive screen
+    window.navigateTo('receive-screen');
+    return true;
+  };
