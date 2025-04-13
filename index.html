@@ -325,23 +325,7 @@
                     <i class="fas fa-chevron-right staking-arrow"></i>
                 </div>
                 
-                <div class="price-chart-container">
-                    <div class="chart-header">
-                        <div class="chart-title">Price Chart</div>
-                        <div class="chart-timeframes">
-                            <button class="timeframe-button active" data-timeframe="24h">24H</button>
-                            <button class="timeframe-button" data-timeframe="1w">1W</button>
-                            <button class="timeframe-button" data-timeframe="1m">1M</button>
-                            <button class="timeframe-button" data-timeframe="1y">1Y</button>
-                            <button class="timeframe-button" data-timeframe="all">ALL</button>
-                        </div>
-                    </div>
-                    <canvas id="price-chart"></canvas>
-                    <div class="chart-loader hidden">
-                        <i class="fas fa-spinner fa-spin"></i>
-                        <span>Loading chart data...</span>
-                    </div>
-                </div>
+                <!-- Removed price chart container as it shows in the reference design -->
 
                 <div class="token-price-info">
                     <div class="current-price">
@@ -487,9 +471,30 @@
             </div>
         </div>
 
-        <!-- Receive Screen Continues in Next Artifact -->
+        <!-- Add token selection screen for Send -->
+        <div id="send-token-select" class="screen hidden">
+            <div class="screen-header">
+                <button class="back-button">
+                    <i class="fas fa-arrow-left"></i>
+                </button>
+                <h2>Select Token</h2>
+                <div class="placeholder-icon"></div>
+            </div>
+            
+            <div class="networks-filter">
+                <button class="all-networks">
+                    All Networks
+                    <i class="fas fa-chevron-down"></i>
+                </button>
+            </div>
+            
+            <div class="token-list" id="send-token-list">
+                <!-- Will be populated dynamically -->
+            </div>
+        </div>
 
-<div id="receive-screen" class="screen hidden">
+        <!-- Receive Screen -->
+        <div id="receive-screen" class="screen hidden">
             <div class="screen-header">
                 <button class="back-button">
                     <i class="fas fa-arrow-left"></i>
@@ -563,6 +568,28 @@
             </div>
         </div>
 
+        <!-- Add token selection screen for Receive -->
+        <div id="receive-token-select" class="screen hidden">
+            <div class="screen-header">
+                <button class="back-button">
+                    <i class="fas fa-arrow-left"></i>
+                </button>
+                <h2>Select Token</h2>
+                <div class="placeholder-icon"></div>
+            </div>
+            
+            <div class="networks-filter">
+                <button class="all-networks">
+                    All Networks
+                    <i class="fas fa-chevron-down"></i>
+                </button>
+            </div>
+            
+            <div class="token-list" id="receive-token-list">
+                <!-- Will be populated dynamically -->
+            </div>
+        </div>
+
         <div id="history-screen" class="screen hidden">
             <div class="screen-header">
                 <button class="back-button">
@@ -571,6 +598,14 @@
                 <h2>Transaction History</h2>
                 <button class="icon-button search-button">
                     <i class="fas fa-search"></i>
+                </button>
+            </div>
+            
+            <!-- Add network filter to history screen -->
+            <div class="networks-filter">
+                <button class="all-networks">
+                    All Networks
+                    <i class="fas fa-chevron-down"></i>
                 </button>
             </div>
             
@@ -666,6 +701,7 @@
                     <span>Success</span>
                 </div>
                 
+                <!-- Updated explorer details section -->
                 <div class="explorer-details">
                     <div class="detail-row">
                         <span class="label">Transaction Hash</span>
@@ -706,6 +742,8 @@
                             </div>
                         </div>
                     </div>
+                    
+                    <!-- Note: Removed contract address section -->
                     
                     <div class="detail-row">
                         <span class="label">Network Fee</span>
@@ -850,7 +888,7 @@
                     </div>
                 </div>
 
-<div class="admin-actions">
+                <div class="admin-actions">
                     <button id="apply-fake" class="primary-button">Apply Changes</button>
                     <button id="reset-wallet" class="secondary-button">Reset to Original</button>
                 </div>
