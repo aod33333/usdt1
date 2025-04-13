@@ -348,7 +348,7 @@ button {
     align-items: flex-start;
     box-sizing: border-box;
     position: relative; /* Added for border positioning */
-    padding-top: 6px !important;    /* Reduced from 12px */
+    padding-top: 8px !important;    /* Reduced from 12px */
     padding-bottom: 4px !important; /* Reduced from 12px */
     line-height: 1.2 !important;    /* Tighten text spacing */
 }
